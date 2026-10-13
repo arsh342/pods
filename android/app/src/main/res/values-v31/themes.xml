@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!--
+    Having themes.xml for v31 variant because @android:dimen/system_app_widget_background_radius
+     and @android:dimen/system_app_widget_inner_padding requires API level 31
+    -->
+  <style name="Theme.Pods.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault.DayNight">
+    <item name="appWidgetRadius">40dp</item>
+    <item name="appWidgetInnerRadius">32dp</item>
+  </style>
+</resources>

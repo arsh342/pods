@@ -1,0 +1,34 @@
+# Android and Gradle build output
+.gradle/
+.kotlin/
+**/build/
+**/.cxx/
+**/.externalNativeBuild/
+captures/
+
+# Machine-specific Android configuration
+**/local.properties
+
+# Release signing keys and generated release packages
+*.jks
+*.keystore
+*.apk
+*.aab
+/release/
+
+# IDE and operating system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Native build and user files
+cmake-build-*/
+CMakeLists.txt.user*
+
+# Documentation
+docs/
+
+# Icons
+icon Exports
+icon.icon
