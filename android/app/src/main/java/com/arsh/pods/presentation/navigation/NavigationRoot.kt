@@ -89,7 +89,9 @@ fun NavigationRoot(
         visible = true,
         title = title,
         expandedTitle = currentScreen == Screen.AirPodsSettings,
-        showTitle = currentScreen != Screen.AirPodsSettings && currentScreen != Screen.AppSettings,
+        showTitle = currentScreen != Screen.AirPodsSettings &&
+            currentScreen != Screen.AppSettings &&
+            currentScreen != Screen.Accessibility,
         showBackButton = backStack.size > 1,
         onNavigateBack = { backStack.removeAt(backStack.lastIndex) },
         actionButtons = actionButtons

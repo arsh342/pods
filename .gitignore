@@ -12,6 +12,7 @@ captures/
 # Release signing keys and generated release packages
 *.jks
 *.keystore
+*.pem
 *.apk
 *.aab
 /release/
