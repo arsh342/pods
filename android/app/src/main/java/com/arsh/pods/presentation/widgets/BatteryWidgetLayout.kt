@@ -18,20 +18,65 @@
 
 package com.arsh.pods.presentation.widgets
 
+import kotlin.math.roundToInt
+
 enum class WidgetShape { ROW, COLUMN, GRID }
 
-private const val ROW_FROM_RATIO = 1.6f
-private const val COLUMN_UP_TO_RATIO = 0.65f
+/** What one ring of the widget shows. [LOWEST_BUD] is whichever earbud has less charge. */
+enum class WidgetSlot { LEFT, RIGHT, CASE, PHONE, LOWEST_BUD, HEADSET }
 
-/** Picks the arrangement of the three rings for a widget of this size. */
-fun widgetShape(widthDp: Float, heightDp: Float): WidgetShape {
-    if (widthDp <= 0f || heightDp <= 0f) return WidgetShape.ROW
-    val ratio = widthDp / heightDp
+data class WidgetArrangement(val shape: WidgetShape, val slots: List<WidgetSlot>)
+
+// The space one ring needs, so that two home screen cells hold two rings across or down.
+private const val RING_PITCH_ACROSS = 70f
+private const val RING_PITCH_DOWN = 80f
+
+// Wider than this, a widget with room for two rows still reads better as one row.
+private const val ROW_FROM_RATIO = 1.6f
+
+private val inOrder = listOf(WidgetSlot.LEFT, WidgetSlot.RIGHT, WidgetSlot.CASE, WidgetSlot.PHONE)
+
+private val withHeadphones = listOf(WidgetSlot.HEADSET, WidgetSlot.PHONE)
+
+/** What fits in a widget of this size, measured in dp on screen. */
+fun widgetArrangement(widthDp: Float, heightDp: Float, headphones: Boolean = false): WidgetArrangement {
+    if (headphones) {
+        // Only the headphones and the phone to show: side by side where possible.
+        val across = widthDp <= 0f || widthDp >= 2 * RING_PITCH_ACROSS
+        return when {
+            across -> WidgetArrangement(WidgetShape.ROW, withHeadphones)
+            heightDp >= 2 * RING_PITCH_DOWN -> WidgetArrangement(WidgetShape.COLUMN, withHeadphones)
+            else -> WidgetArrangement(WidgetShape.ROW, listOf(WidgetSlot.HEADSET))
+        }
+    }
+    if (widthDp <= 0f || heightDp <= 0f) return WidgetArrangement(WidgetShape.ROW, inOrder.take(3))
+    val across = (widthDp / RING_PITCH_ACROSS).toInt().coerceIn(1, inOrder.size)
+    val down = (heightDp / RING_PITCH_DOWN).toInt().coerceIn(1, inOrder.size)
     return when {
-        ratio >= ROW_FROM_RATIO -> WidgetShape.ROW
-        ratio <= COLUMN_UP_TO_RATIO -> WidgetShape.COLUMN
-        else -> WidgetShape.GRID
+        across == 1 && down == 1 -> WidgetArrangement(WidgetShape.ROW, listOf(WidgetSlot.LOWEST_BUD))
+        across == 1 -> WidgetArrangement(WidgetShape.COLUMN, inOrder.take(down))
+        down >= 2 && widthDp / heightDp < ROW_FROM_RATIO -> WidgetArrangement(WidgetShape.GRID, inOrder)
+        else -> WidgetArrangement(WidgetShape.ROW, inOrder.take(across))
     }
 }
 
 fun isLowBattery(level: Int): Boolean = level in 1..10
+
+/** The largest size with the drawing's own proportions that fits a square of side [box]. */
+fun fittedSize(width: Float, height: Float, box: Float): Pair<Float, Float> {
+    if (width <= 0f || height <= 0f) return box to box
+    val scale = box / maxOf(width, height)
+    return width * scale to height * scale
+}
+
+/** The background colour chosen for a widget. [SYSTEM] follows the phone's dark mode. */
+enum class WidgetTheme { SYSTEM, DARK, LIGHT }
+
+fun WidgetTheme.usesDarkColours(phoneIsDark: Boolean): Boolean = when (this) {
+    WidgetTheme.SYSTEM -> phoneIsDark
+    WidgetTheme.DARK -> true
+    WidgetTheme.LIGHT -> false
+}
+
+fun backgroundAlpha(transparencyPercent: Int): Int =
+    ((100 - transparencyPercent.coerceIn(0, 100)) * 255 / 100f).roundToInt()

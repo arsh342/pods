@@ -1,35 +1,65 @@
 package com.arsh.pods.presentation
 
-import com.arsh.pods.presentation.widgets.WidgetShape
+import com.arsh.pods.presentation.widgets.WidgetArrangement
+import com.arsh.pods.presentation.widgets.WidgetShape.COLUMN
+import com.arsh.pods.presentation.widgets.WidgetShape.GRID
+import com.arsh.pods.presentation.widgets.WidgetShape.ROW
+import com.arsh.pods.presentation.widgets.fittedSize
+import com.arsh.pods.presentation.widgets.WidgetSlot.CASE
+import com.arsh.pods.presentation.widgets.WidgetSlot.HEADSET
+import com.arsh.pods.presentation.widgets.WidgetSlot.LEFT
+import com.arsh.pods.presentation.widgets.WidgetSlot.LOWEST_BUD
+import com.arsh.pods.presentation.widgets.WidgetSlot.PHONE
+import com.arsh.pods.presentation.widgets.WidgetSlot.RIGHT
 import com.arsh.pods.presentation.widgets.isLowBattery
-import com.arsh.pods.presentation.widgets.widgetShape
+import com.arsh.pods.presentation.widgets.widgetArrangement
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/** Sizes are what a Galaxy S24 home screen gives each number of cells, in dp on screen. */
 class BatteryWidgetLayoutTest {
+    private val everything = listOf(LEFT, RIGHT, CASE, PHONE)
+
     @Test
-    fun wideWidgetsUseTheRow() {
-        assertEquals(WidgetShape.ROW, widgetShape(270f, 90f))
-        assertEquals(WidgetShape.ROW, widgetShape(360f, 200f))
+    fun twoCellsWideShowsOnlyTheEarbuds() {
+        assertEquals(WidgetArrangement(ROW, listOf(LEFT, RIGHT)), widgetArrangement(147f, 73f))
     }
 
     @Test
-    fun tallWidgetsUseTheColumn() {
-        assertEquals(WidgetShape.COLUMN, widgetShape(80f, 280f))
-        assertEquals(WidgetShape.COLUMN, widgetShape(150f, 380f))
+    fun threeCellsWideAddsTheCase() {
+        assertEquals(WidgetArrangement(ROW, listOf(LEFT, RIGHT, CASE)), widgetArrangement(231f, 75f))
     }
 
     @Test
-    fun squarishWidgetsUseTheGrid() {
-        assertEquals(WidgetShape.GRID, widgetShape(180f, 180f))
-        assertEquals(WidgetShape.GRID, widgetShape(70f, 90f))
+    fun fourCellsWideAddsThePhone() {
+        assertEquals(WidgetArrangement(ROW, everything), widgetArrangement(314f, 75f))
+        assertEquals(WidgetArrangement(ROW, everything), widgetArrangement(314f, 168f))
     }
 
     @Test
-    fun missingSizeFallsBackToTheDefaultRow() {
-        assertEquals(WidgetShape.ROW, widgetShape(0f, 0f))
+    fun squarishWidgetsShowEverythingIncludingThePhone() {
+        assertEquals(WidgetArrangement(GRID, everything), widgetArrangement(148f, 168f))
+        assertEquals(WidgetArrangement(GRID, everything), widgetArrangement(231f, 168f))
+        assertEquals(WidgetArrangement(GRID, everything), widgetArrangement(314f, 354f))
+    }
+
+    @Test
+    fun oneCellWideStacksAsManyAsFit() {
+        assertEquals(WidgetArrangement(COLUMN, listOf(LEFT, RIGHT)), widgetArrangement(65f, 168f))
+        assertEquals(WidgetArrangement(COLUMN, listOf(LEFT, RIGHT, CASE)), widgetArrangement(65f, 261f))
+        assertEquals(WidgetArrangement(COLUMN, everything), widgetArrangement(65f, 354f))
+    }
+
+    @Test
+    fun aSingleCellShowsTheEarbudWithLessCharge() {
+        assertEquals(WidgetArrangement(ROW, listOf(LOWEST_BUD)), widgetArrangement(65f, 75f))
+    }
+
+    @Test
+    fun missingSizeFallsBackToTheDefaultThree() {
+        assertEquals(WidgetArrangement(ROW, listOf(LEFT, RIGHT, CASE)), widgetArrangement(0f, 0f))
     }
 
     @Test
@@ -38,5 +68,32 @@ class BatteryWidgetLayoutTest {
         assertTrue(isLowBattery(1))
         assertFalse(isLowBattery(11))
         assertFalse(isLowBattery(0))
+    }
+
+    @Test
+    fun iconsKeepTheirProportionsInsideTheirBox() {
+        // The earbud drawing is tall and the case drawing is wide.
+        val (budWidth, budHeight) = fittedSize(94f, 123f, 20f)
+        assertEquals(20f, budHeight, 0.01f)
+        assertEquals(15.28f, budWidth, 0.01f)
+
+        val (caseWidth, caseHeight) = fittedSize(141f, 109f, 20f)
+        assertEquals(20f, caseWidth, 0.01f)
+        assertEquals(15.46f, caseHeight, 0.01f)
+    }
+
+    @Test
+    fun anIconWithoutASizeFillsTheBox() {
+        assertEquals(20f to 20f, fittedSize(-1f, -1f, 20f))
+    }
+
+    @Test
+    fun headphonesTakeThePlaceOfEarbudsAndCase() {
+        fun max(width: Float, height: Float) = widgetArrangement(width, height, headphones = true)
+
+        assertEquals(WidgetArrangement(ROW, listOf(HEADSET, PHONE)), max(147f, 73f))
+        assertEquals(WidgetArrangement(ROW, listOf(HEADSET, PHONE)), max(314f, 168f))
+        assertEquals(WidgetArrangement(COLUMN, listOf(HEADSET, PHONE)), max(65f, 261f))
+        assertEquals(WidgetArrangement(ROW, listOf(HEADSET)), max(65f, 75f))
     }
 }

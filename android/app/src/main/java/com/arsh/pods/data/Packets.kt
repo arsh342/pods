@@ -33,6 +33,8 @@ enum class Enums(val value: ByteArray) {
 }
 
 object BatteryComponent {
+    // The single battery of AirPods Max.
+    const val HEADSET = 1
     const val LEFT = 4
     const val RIGHT = 2
     const val CASE = 8
@@ -52,6 +54,7 @@ data class Battery(val component: Int, val level: Int, val status: Int) : Parcel
             BatteryComponent.LEFT -> "LEFT"
             BatteryComponent.RIGHT -> "RIGHT"
             BatteryComponent.CASE -> "CASE"
+            BatteryComponent.HEADSET -> "HEADSET"
             else -> null
         }
     }
@@ -185,7 +188,18 @@ class AirPodsNotifications {
             case = Battery(BatteryComponent.CASE, caseLevel, if (caseCharging) BatteryStatus.CHARGING else BatteryStatus.NOT_CHARGING)
         }
 
+        // Only AirPods Max report this; the earbud and case entries then stay disconnected.
+        private var headset: Battery? = null
+
         fun setBattery(data: ByteArray) {
+            // Headphones send one entry of five bytes after the seven byte header.
+            if (data.size == 12 && data[6].toInt() == 1 && data[7].toInt() == BatteryComponent.HEADSET) {
+                first = Battery(BatteryComponent.LEFT, 0, BatteryStatus.DISCONNECTED)
+                second = Battery(BatteryComponent.RIGHT, 0, BatteryStatus.DISCONNECTED)
+                case = Battery(BatteryComponent.CASE, 0, BatteryStatus.DISCONNECTED)
+                headset = Battery(BatteryComponent.HEADSET, data[9].toInt(), data[10].toInt())
+                return
+            }
             if (data.size != 22) {
                 return
             }
@@ -205,6 +219,7 @@ class AirPodsNotifications {
 //                Battery(data[17].toInt(), data[19].toInt(), data[20].toInt())
 //            }
 //            sometimes it shows battery as -1%, just skip all that and set it normally
+            headset = null
             first = Battery(
                 data[7].toInt(), data[9].toInt(), data[10].toInt()
             )
@@ -219,7 +234,7 @@ class AirPodsNotifications {
         fun getBattery(): List<Battery> {
             val left = if (first.component == BatteryComponent.LEFT) first else second
             val right = if (first.component == BatteryComponent.LEFT) second else first
-            return listOf(left, right, case)
+            return listOfNotNull(left, right, case, headset)
         }
     }
 

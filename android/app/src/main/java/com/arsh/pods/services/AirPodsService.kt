@@ -102,6 +102,8 @@ import com.arsh.pods.data.XposedRemotePrefProvider
 import com.arsh.pods.data.isHeadTrackingData
 import com.arsh.pods.presentation.widgets.BatteryWidget
 import com.arsh.pods.presentation.widgets.BatteryWidgetRenderer
+import com.arsh.pods.utils.lowBatteryParts
+import com.arsh.pods.utils.LowBatteryNotification
 import com.arsh.pods.utils.GestureDetector
 import com.arsh.pods.utils.HeadTracking
 import com.arsh.pods.utils.MediaController
@@ -1732,7 +1734,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             "AirPods Low Battery",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Alerts when an AirPod or the charging case reaches 10%, 5%, 2% or 1% battery"
+            description = "A live update while an AirPod or the case is at 10% or below, with a sound at 10%, 5%, 2% and 1%"
         }
 
         val notificationManager = getSystemService(NotificationManager::class.java)
@@ -1754,7 +1756,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         )
 
         val notification = NotificationCompat.Builder(this, "background_service_status")
-            .setSmallIcon(R.drawable.airpods).setContentTitle("Pods is running")
+            .setSmallIcon(AirPodsModels.statusIcon(this)).setContentTitle("Pods is running")
             .setContentText("Tap to hide this notification.")
             .setContentIntent(pendingIntentNotifDisable).setCategory(Notification.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_LOW).setOngoing(true).build()
@@ -1788,7 +1790,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         )
 
         val notification = NotificationCompat.Builder(this, "socket_connection_failure")
-            .setSmallIcon(R.drawable.airpods).setContentTitle("AirPods Connection Issue")
+            .setSmallIcon(AirPodsModels.statusIcon(this)).setContentTitle("AirPods Connection Issue")
             .setContentText("Unable to connect to AirPods over L2CAP").setStyle(
                 NotificationCompat.BigTextStyle().bigText(
                     "Your AirPods are connected via Bluetooth, but Pods couldn't connect to AirPods using L2CAP. Error: $errorMessage"
@@ -1890,17 +1892,15 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     private fun notifyLowBatteryThresholds() {
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            50,
-            notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val connected = BluetoothConnectionManager.aacpSocket?.isConnected == true || config.bleOnlyMode
+        if (!connected) {
+            LowBatteryNotification.remove(this)
+            return
+        }
 
         // Persisted, so a service restart does not repeat an alert.
-        val sent = getSharedPreferences("low_battery", MODE_PRIVATE)
+        val sent = getSharedPreferences(LowBatteryNotification.PREFERENCES, MODE_PRIVATE)
+        var newThreshold = false
 
         batteryNotification.getBattery().forEach { battery ->
             if (battery.status == BatteryStatus.DISCONNECTED) return@forEach
@@ -1913,25 +1913,13 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             if (decision.lowestSent != lowestSent) {
                 sent.edit { putInt(key, decision.lowestSent ?: -1) }
             }
-            if (decision.notify == null) return@forEach
-
-            val componentName = when (battery.component) {
-                BatteryComponent.LEFT -> "Left AirPod"
-                BatteryComponent.RIGHT -> "Right AirPod"
-                BatteryComponent.CASE -> "Charging case"
-                else -> "AirPods"
-            }
-            val notification = NotificationCompat.Builder(this, LOW_BATTERY_NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.airpods)
-                .setContentTitle("AirPods battery at ${battery.level}%")
-                .setContentText("$componentName battery is at ${battery.level}%")
-                .setContentIntent(pendingIntent)
-                .setCategory(Notification.CATEGORY_STATUS)
-                .setAutoCancel(true)
-                .build()
-            // One slot per component: a newer, lower alert replaces the previous one.
-            notificationManager.notify(500 + battery.component, notification)
+            if (decision.notify != null) newThreshold = true
         }
+
+        LowBatteryNotification.refresh(
+            this, LOW_BATTERY_NOTIFICATION_CHANNEL,
+            lowBatteryParts(batteryNotification.getBattery()), newThreshold
+        )
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -1947,6 +1935,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             notificationIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+
+        if (!connected) LowBatteryNotification.remove(this)
 
         if (BluetoothConnectionManager.aacpSocket == null) {
             return

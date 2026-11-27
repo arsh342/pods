@@ -120,7 +120,7 @@ fun LongPress(viewModel: AirPodsViewModel, name: String) {
                         orientation = ListItemOrientation.Vertical,
                         leadingContent = {
                             Icon(
-                                painter = painterResource(R.drawable.noise_cancellation),
+                                painter = painterResource(R.drawable.noise_off),
                                 contentDescription = "Icon",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier

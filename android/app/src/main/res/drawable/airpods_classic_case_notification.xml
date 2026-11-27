@@ -1,0 +1,11 @@
+<!-- First and second generation charging case: tall. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="110dp"
+    android:height="123dp"
+    android:viewportWidth="110"
+    android:viewportHeight="123">
+    <path
+        android:fillColor="#D9FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M36,4L74,4C92,4 104,16 104,34L104,102C104,112 96,119 86,119L24,119C14,119 6,112 6,102L6,34C6,16 18,4 36,4ZM7,36L103,36L103,41L7,41ZM50,58C50,55.2 52.2,53 55,53C57.8,53 60,55.2 60,58C60,60.8 57.8,63 55,63C52.2,63 50,60.8 50,58Z" />
+</vector>

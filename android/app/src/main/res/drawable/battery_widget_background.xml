@@ -1,0 +1,6 @@
+<!-- The dark see-through pill of the Galaxy battery widget. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#A6000000" />
+    <corners android:radius="44dp" />
+</shape>

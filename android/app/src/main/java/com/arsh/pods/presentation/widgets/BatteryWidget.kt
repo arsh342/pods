@@ -34,6 +34,11 @@ class BatteryWidget : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         ServiceManager.getService()?.updateBattery()
+            ?: drawWithoutAirPods(context, appWidgetManager, appWidgetIds)
+    }
+
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        appWidgetIds.forEach { WidgetSettings.remove(context, it) }
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -44,5 +49,10 @@ class BatteryWidget : AppWidgetProvider() {
     ) {
         // The widget was resized, so it may need a different arrangement.
         ServiceManager.getService()?.updateBatteryWidget()
+            ?: drawWithoutAirPods(context, appWidgetManager, intArrayOf(appWidgetId))
     }
+
+    // Without the service there is nothing to say about the AirPods, but the widget is not left blank.
+    private fun drawWithoutAirPods(context: Context, manager: AppWidgetManager, ids: IntArray) =
+        BatteryWidgetRenderer.update(context, manager, ids, emptyList())
 }

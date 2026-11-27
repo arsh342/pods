@@ -98,7 +98,7 @@ fun NoiseControlSettings(
                         Triple(
                             NoiseControlMode.OFF,
                             R.string.off,
-                            R.drawable.noise_cancellation
+                            R.drawable.noise_off
                         )
                     )
                 }
@@ -278,7 +278,7 @@ fun NoiseControlSettings(
                         ) {
                             if (showOffListeningMode) {
                                 NoiseControlButton(
-                                    icon = ImageBitmap.imageResource(R.drawable.noise_cancellation),
+                                    icon = ImageBitmap.imageResource(R.drawable.noise_off),
                                     onClick = { onModeSelected(NoiseControlMode.OFF) },
                                     textColor = if (noiseControlMode.value == NoiseControlMode.OFF) textColorSelected else textColor,
                                     modifier = Modifier.weight(1f),
@@ -354,7 +354,7 @@ fun NoiseControlSettings(
                         ) {
                             if (showOffListeningMode) {
                                 NoiseControlButton(
-                                    icon = ImageBitmap.imageResource(R.drawable.noise_cancellation),
+                                    icon = ImageBitmap.imageResource(R.drawable.noise_off),
                                     onClick = { onModeSelected(NoiseControlMode.OFF) },
                                     textColor = if (noiseControlMode.value == NoiseControlMode.OFF) textColorSelected else textColor,
                                     modifier = Modifier.weight(1f),

@@ -1,0 +1,19 @@
+<!-- Right AirPod, first and second generation. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="94dp"
+    android:height="123dp"
+    android:viewportWidth="94"
+    android:viewportHeight="123">
+    <group
+        android:scaleX="-1"
+        android:translateX="94">
+        <path
+            android:fillColor="#D9FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M47,8C68,8 82,22 82,40C82,58 68,70 50,70C42,70 37,69 31,67L31,48C18,42 15,29 23,19C29,12 37,8 47,8ZM70,26C66,26 63,33 63,40C63,47 66,54 70,54C74,54 77,47 77,40C77,33 74,26 70,26Z" />
+        <path
+            android:fillColor="#D9FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M31,74C35,75 39,76 43,76L43,114C43,117 41,119 37,119C33,119 31,117 31,114Z" />
+    </group>
+</vector>

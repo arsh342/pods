@@ -1,0 +1,27 @@
+<!-- Drawing of AirPods Max; there is no product picture for them. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="360dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <path
+        android:fillColor="#FFB9BCC2"
+        android:fillType="evenOdd"
+        android:pathData="M20,62L20,48C20,24 38,8 60,8C82,8 100,24 100,48L100,62L90,62L90,49C90,30 77,18 60,18C43,18 30,30 30,49L30,62Z" />
+    <path
+        android:fillColor="#FFD5D7DB"
+        android:fillType="evenOdd"
+        android:pathData="M16,56L28,56C36,56 42,62 42,70L42,98C42,106 36,112 28,112L24,112C14,112 8,106 8,96L8,64C8,59 11,56 16,56Z" />
+    <path
+        android:fillColor="#FFD5D7DB"
+        android:fillType="evenOdd"
+        android:pathData="M104,56L92,56C84,56 78,62 78,70L78,98C78,106 84,112 92,112L96,112C106,112 112,106 112,96L112,64C112,59 109,56 104,56Z" />
+    <path
+        android:fillColor="#FF8D9096"
+        android:fillType="evenOdd"
+        android:pathData="M28,66C34,66 36,70 36,75L36,93C36,98 34,102 28,102Z" />
+    <path
+        android:fillColor="#FF8D9096"
+        android:fillType="evenOdd"
+        android:pathData="M92,66C86,66 84,70 84,75L84,93C84,98 86,102 92,102Z" />
+</vector>

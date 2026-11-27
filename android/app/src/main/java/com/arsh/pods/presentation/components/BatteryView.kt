@@ -20,10 +20,12 @@
 
 package com.arsh.pods.presentation.components
 
+import androidx.compose.ui.res.painterResource
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,8 +39,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -69,6 +69,26 @@ fun BatteryView(
     val combineEarbudBatteries = left != null && right != null &&
         left.status == right.status && (leftLevel - rightLevel) in -3..3
 
+    // AirPods Max: one picture and one battery, with no earbuds or case.
+    val headset = batteryList.find { it.component == BatteryComponent.HEADSET }
+    if (headset != null) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(budsRes),
+                contentDescription = stringResource(R.string.buds),
+                modifier = Modifier
+                    .widthIn(max = 240.dp)
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            )
+            BatteryIndicator(headset.level, headset.status)
+        }
+        return
+    }
+
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -82,11 +102,13 @@ fun BatteryView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    bitmap = ImageBitmap.imageResource(budsRes),
+                    painter = painterResource(budsRes),
                     contentDescription = stringResource(R.string.buds),
+                    // Every picture is square, so both fill their column whatever their pixel size.
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
+                        .aspectRatio(1f)
                 )
 
                 if (combineEarbudBatteries) {
@@ -129,11 +151,12 @@ fun BatteryView(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    bitmap = ImageBitmap.imageResource(caseRes),
+                    painter = painterResource(caseRes),
                     contentDescription = stringResource(R.string.case_alt),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
+                        .aspectRatio(1f)
                 )
 
                 if (caseLevel > 0 || case?.status != BatteryStatus.DISCONNECTED) {

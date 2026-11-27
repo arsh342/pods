@@ -20,6 +20,7 @@
 
 package com.arsh.pods
 
+import com.arsh.pods.data.AirPodsModels
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -427,7 +428,7 @@ fun NewControlCenterDialogContent(
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.airpods),
+                    painter = painterResource(id = AirPodsModels.statusIcon(LocalContext.current)),
                     contentDescription = "Device Icon",
                     tint = textColor.copy(alpha = 0.8f),
                     modifier = Modifier.size(48.dp)
@@ -587,7 +588,7 @@ fun NewControlCenterDialogContent(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.airpods),
+                                        painter = painterResource(id = AirPodsModels.statusIcon(LocalContext.current)),
                                         contentDescription = "Conversational Awareness",
                                         tint = Color.White,
                                         modifier = Modifier.size(32.dp)
@@ -622,7 +623,7 @@ fun NewControlCenterDialogContent(
 
 private fun getModeIconRes(mode: NoiseControlMode): Int {
     return when (mode) {
-        NoiseControlMode.OFF -> R.drawable.noise_cancellation
+        NoiseControlMode.OFF -> R.drawable.noise_off
         NoiseControlMode.TRANSPARENCY -> R.drawable.transparency
         NoiseControlMode.ADAPTIVE -> R.drawable.adaptive
         NoiseControlMode.NOISE_CANCELLATION -> R.drawable.noise_cancellation

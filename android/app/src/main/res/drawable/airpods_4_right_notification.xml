@@ -1,0 +1,19 @@
+<!-- Right AirPods 4: the left one mirrored. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="94dp"
+    android:height="123dp"
+    android:viewportWidth="94"
+    android:viewportHeight="123">
+    <group
+        android:scaleX="-1"
+        android:translateX="94">
+        <path
+            android:fillColor="#D9FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M46,8C70,8 86,24 86,43C86,62 71,74 53,76C45,77 38,79 27,79L27,52C15,45 13,31 21,21C27,13 36,8 46,8ZM70,27C65,27 62,35 62,44C62,53 65,61 70,61C75,61 78,53 78,44C78,35 75,27 70,27ZM33,26C33,23 37,20 42,20C47,20 51,23 51,26C51,29 47,31 42,31C37,31 33,29 33,26Z" />
+        <path
+            android:fillColor="#D9FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M27,83C33,82 39,81 46,80L46,111C46,115 43,118 39,118L34,118C30,118 27,115 27,111Z" />
+    </group>
+</vector>

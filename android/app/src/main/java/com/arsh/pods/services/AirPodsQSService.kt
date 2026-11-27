@@ -20,6 +20,7 @@
 
 package com.arsh.pods.services
 
+import com.arsh.pods.data.AirPodsModels
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -216,7 +217,7 @@ class AirPodsQSService : TileService() {
             tile.state = Tile.STATE_UNAVAILABLE
             tile.label = "AirPods"
             tile.subtitle = "Disconnected"
-            tile.icon = Icon.createWithResource(this, R.drawable.airpods)
+            tile.icon = Icon.createWithResource(this, AirPodsModels.statusIcon(this))
         }
 
         try {
@@ -264,11 +265,11 @@ class AirPodsQSService : TileService() {
 
      private fun getModeIcon(mode: Int): Int {
          return when (mode) {
-             NoiseControlMode.OFF.ordinal + 1 -> R.drawable.noise_cancellation
+             NoiseControlMode.OFF.ordinal + 1 -> R.drawable.noise_off
              NoiseControlMode.TRANSPARENCY.ordinal + 1 -> R.drawable.transparency
              NoiseControlMode.ADAPTIVE.ordinal + 1 -> R.drawable.adaptive
              NoiseControlMode.NOISE_CANCELLATION.ordinal + 1 -> R.drawable.noise_cancellation
-             else -> R.drawable.airpods
+             else -> AirPodsModels.statusIcon(this)
          }
      }
 

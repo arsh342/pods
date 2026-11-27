@@ -1,0 +1,11 @@
+<!-- AirPods 4 charging case: small and rounded. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="110dp"
+    android:viewportWidth="120"
+    android:viewportHeight="110">
+    <path
+        android:fillColor="#D9FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M44,6L76,6C98,6 114,22 114,44L114,66C114,88 98,104 76,104L44,104C22,104 6,88 6,66L6,44C6,22 22,6 44,6ZM7,38L113,38L113,43L7,43ZM55,59C55,56.2 57.2,54 60,54C62.8,54 65,56.2 65,59C65,61.8 62.8,64 60,64C57.2,64 55,61.8 55,59Z" />
+</vector>

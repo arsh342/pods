@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:configure="com.arsh.pods.presentation.widgets.BatteryWidgetSettingsActivity"
     android:description="@string/app_widget_description"
+    android:widgetFeatures="reconfigurable|configuration_optional"
     android:initialKeyguardLayout="@layout/battery_widget"
     android:initialLayout="@layout/battery_widget"
     android:minWidth="180dp"
