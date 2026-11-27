@@ -290,4 +290,20 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="i_agree">I agree</string>
     <string name="compatibility_check_bypassed">Compatibility check bypassed. Are you sure your device is compatible?</string>
+    <string name="airpods_equalizer">AirPods equalizer</string>
+    <string name="airpods_equalizer_description">Saved on your AirPods. Requires firmware 9A348 or later.</string>
+    <string name="eq_low">Low</string>
+    <string name="eq_mid">Mid</string>
+    <string name="eq_high">High</string>
+    <string name="phone_sound">Phone</string>
+    <string name="phone_equalizer">Phone equalizer</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_controls">Controls</string>
+    <string name="tab_sound">Sound</string>
+    <string name="tab_settings">Settings</string>
+    <string name="app_settings">App settings</string>
+    <string name="hide_background_notification">Hide background notification</string>
+    <string name="hide_background_notification_description">Turn off “Background Service Status”. Pods keeps running.</string>
+    <string name="case_sounds">Charging case sounds</string>
+    <string name="case_sounds_description">Your AirPods do not report this setting. Your choice here is sent each time they connect to this phone.</string>
 </resources>

@@ -23,6 +23,7 @@ package com.arsh.pods.presentation.widgets
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.os.Bundle
 import com.arsh.pods.services.ServiceManager
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -33,5 +34,15 @@ class BatteryWidget : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         ServiceManager.getService()?.updateBattery()
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle
+    ) {
+        // The widget was resized, so it may need a different arrangement.
+        ServiceManager.getService()?.updateBatteryWidget()
     }
 }

@@ -60,4 +60,7 @@ sealed interface Screen: NavKey {
     @Serializable
     data object MicrophoneSettings: Screen
 
+    @Serializable
+    data object Equalizer: Screen
+
 }

@@ -29,6 +29,7 @@ CMakeLists.txt.user*
 
 # Documentation
 docs/
+oneui_design_guide_eng.pdf
 
 # Icons
 icon Exports

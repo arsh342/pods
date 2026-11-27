@@ -19,12 +19,13 @@
 package com.arsh.pods.presentation.screens
 
 // import com.arsh.pods.utils.RadareOffsetFinder
+import com.arsh.pods.utils.userChanges
+import com.arsh.pods.presentation.components.SegmentedSelector
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -34,7 +35,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,21 +50,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
 import com.arsh.pods.R
 import com.arsh.pods.bluetooth.AACPManager
 import com.arsh.pods.bluetooth.ATTHandles
@@ -80,7 +70,6 @@ import com.arsh.pods.presentation.viewmodel.AirPodsViewModel
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.milliseconds
 
-private var phoneMediaDebounceJob: Job? = null
 
 @SuppressLint("DefaultLocale")
 @ExperimentalHazeMaterialsApi
@@ -100,34 +89,18 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToTranspare
 
     val m3eEnabled = LocalDesignSystem.current == DesignSystem.OneUI
     val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-        if (LocalDesignSystem.current == DesignSystem.Apple) 20.dp else 84.dp
-    val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+        64.dp
+    val bottomPadding = if (m3eEnabled) 0.dp else WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.width(56.dp))
-            Text(
-                text = stringResource(R.string.accessibility),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily(Font(R.font.sf_pro))
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-        }
 
         
 //            val phoneMediaEQ = remember { mutableStateOf(FloatArray(8) { 0.5f }) }
@@ -183,70 +156,33 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToTranspare
             )
         }
 
-        val phoneMediaEQ = remember { mutableStateOf(FloatArray(8) { 0.5f }) }
-        val phoneEQEnabled = remember { mutableStateOf(false) }
-        val mediaEQEnabled = remember { mutableStateOf(false) }
-
-        LaunchedEffect(phoneMediaEQ.value, phoneEQEnabled.value, mediaEQEnabled.value) {
-            phoneMediaDebounceJob?.cancel()
-            phoneMediaDebounceJob = CoroutineScope(Dispatchers.IO).launch {
-                delay(150.milliseconds)
-                try {
-                    val phoneByte = if (phoneEQEnabled.value) 0x01.toByte() else 0x02.toByte()
-                    val mediaByte = if (mediaEQEnabled.value) 0x01.toByte() else 0x02.toByte()
-                    Log.d(
-                        "AccessibilitySettingsScreen",
-                        "Sending phone/media EQ (phoneEnabled=${phoneEQEnabled.value}, mediaEnabled=${mediaEQEnabled.value})"
-                    )
-                    viewModel.sendPhoneMediaEQ(phoneMediaEQ.value, phoneByte, mediaByte)
-                } catch (e: Exception) {
-                    Log.w(
-                        "AccessibilitySettingsScreen",
-                        "Error sending phone/media EQ: ${e.message}"
-                    )
-                }
-            }
-        }
-
-        StyledList(
+        SegmentedSelector(
             title = stringResource(R.string.press_speed),
-            description = stringResource(R.string.press_speed_description)
-        ) {
-            pressSpeedOptions.forEach { (value, label) ->
-                StyledListItem(
-                    name = label,
-                    selected = selectedPressSpeed == label,
-                    onClick = {
-                        selectedPressSpeed = label
-
-                        viewModel.setControlCommandByte(
-                            identifier = AACPManager.Companion.ControlCommandIdentifiers.DOUBLE_CLICK_INTERVAL,
-                            value = value
-                        )
-                    }
+            description = stringResource(R.string.press_speed_description),
+            options = pressSpeedOptions.toList(),
+            selected = pressSpeedOptions.entries.firstOrNull { it.value == selectedPressSpeed }?.key ?: (-1).toByte(),
+            onSelect = { value ->
+                selectedPressSpeed = pressSpeedOptions[value]
+                viewModel.setControlCommandByte(
+                    identifier = AACPManager.Companion.ControlCommandIdentifiers.DOUBLE_CLICK_INTERVAL,
+                    value = value
                 )
             }
-        }
+        )
 
-        StyledList(
+        SegmentedSelector(
             title = stringResource(R.string.press_and_hold_duration),
-            description = stringResource(R.string.press_and_hold_duration_description)
-        ) {
-            pressAndHoldDurationOptions.forEach { (value, label) ->
-                StyledListItem(
-                    name = label,
-                    selected = selectedPressAndHoldDuration == label,
-                    onClick = {
-                        selectedPressAndHoldDuration = label
-
-                        viewModel.setControlCommandByte(
-                            identifier = AACPManager.Companion.ControlCommandIdentifiers.CLICK_HOLD_INTERVAL,
-                            value = value
-                        )
-                    }
+            description = stringResource(R.string.press_and_hold_duration_description),
+            options = pressAndHoldDurationOptions.toList(),
+            selected = pressAndHoldDurationOptions.entries.firstOrNull { it.value == selectedPressAndHoldDuration }?.key ?: (-1).toByte(),
+            onSelect = { value ->
+                selectedPressAndHoldDuration = pressAndHoldDurationOptions[value]
+                viewModel.setControlCommandByte(
+                    identifier = AACPManager.Companion.ControlCommandIdentifiers.CLICK_HOLD_INTERVAL,
+                    value = value
                 )
             }
-        }
+        )
 
         StyledToggle(
             title = stringResource(R.string.noise_control),
@@ -277,10 +213,12 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToTranspare
         }
 
         if (!hearingAidEnabled && state.vendorIdHook) {
-            StyledListItem(
-                name = stringResource(R.string.customize_transparency_mode),
-                onClick = navigateToTransparencyCustomization,
-                            )
+            StyledList {
+                StyledListItem(
+                    name = stringResource(R.string.customize_transparency_mode),
+                    onClick = navigateToTransparencyCustomization
+                )
+            }
         }
 
         val toneVolumeValue = remember { mutableFloatStateOf(state.controlStates[AACPManager.Companion.ControlCommandIdentifiers.CHIME_VOLUME]?.getOrNull(0)?.toFloat() ?: 75f) }
@@ -289,7 +227,7 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToTranspare
             snapshotFlow {
                 toneVolumeValue.floatValue
             }
-                .debounce(100.milliseconds)
+                .userChanges(100.milliseconds)
                 .collect {
                     viewModel.setControlCommandValue(
                         AACPManager.Companion.ControlCommandIdentifiers.CHIME_VOLUME,
@@ -328,25 +266,19 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToTranspare
                 },
                             )
 
-            StyledList(
-                title = stringResource(R.string.volume_swipe_speed),
-                description = stringResource(R.string.volume_swipe_speed_description)
-            ) {
-                volumeSwipeSpeedOptions.forEach { (value, label) ->
-                    StyledListItem(
-                        name = label,
-                        selected = selectedVolumeSwipeSpeed == label,
-                        onClick = {
-                            selectedVolumeSwipeSpeed = label
-
-                            viewModel.setControlCommandByte(
-                                identifier = AACPManager.Companion.ControlCommandIdentifiers.VOLUME_SWIPE_INTERVAL,
-                                value = value
-                            )
-                        }
-                    )
-                }
+            SegmentedSelector(
+            title = stringResource(R.string.volume_swipe_speed),
+            description = stringResource(R.string.volume_swipe_speed_description),
+            options = volumeSwipeSpeedOptions.toList(),
+            selected = volumeSwipeSpeedOptions.entries.firstOrNull { it.value == selectedVolumeSwipeSpeed }?.key ?: (-1).toByte(),
+            onSelect = { value ->
+                selectedVolumeSwipeSpeed = volumeSwipeSpeedOptions[value]
+                viewModel.setControlCommandByte(
+                    identifier = AACPManager.Companion.ControlCommandIdentifiers.VOLUME_SWIPE_INTERVAL,
+                    value = value
+                )
             }
+        )
         }
 
 //            if (!hearingAidEnabled && XposedState.isAvailable) {

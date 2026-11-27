@@ -20,6 +20,7 @@
 
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.components.SegmentedSelector
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -74,8 +75,8 @@ fun LongPress(viewModel: AirPodsViewModel, name: String) {
     Log.d("PressAndHoldSettingsScreen", "Adaptive mode: ${(modesByte and 0x08) != 0.toByte()}")
 
     val longPressAction = if (name.lowercase() == "left") state.leftAction else state.rightAction
-    val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+    val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     val scrollState = rememberScrollState()
 
@@ -85,33 +86,18 @@ fun LongPress(viewModel: AirPodsViewModel, name: String) {
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(scrollState)
             .padding(top = 8.dp)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 12.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
-        StyledList {
-            StyledListItem(
-                name = stringResource(R.string.noise_control),
-                selected = longPressAction == StemAction.CYCLE_NOISE_CONTROL_MODES,
-                onClick = {
-                    viewModel.setLongPressAction(
-                        name,
-                        StemAction.CYCLE_NOISE_CONTROL_MODES
-                    )
-                }
-            )
-
-            StyledListItem(
-                name = stringResource(R.string.digital_assistant),
-                selected = longPressAction == StemAction.DIGITAL_ASSISTANT,
-                onClick = {
-                    viewModel.setLongPressAction(
-                        name,
-                        StemAction.DIGITAL_ASSISTANT
-                    )
-                },
-                            )
-        }
+        SegmentedSelector(
+            options = listOf(
+                StemAction.CYCLE_NOISE_CONTROL_MODES to stringResource(R.string.noise_control),
+                StemAction.DIGITAL_ASSISTANT to stringResource(R.string.digital_assistant)
+            ),
+            selected = longPressAction,
+            onSelect = { viewModel.setLongPressAction(name, it) }
+        )
 
         
         if (longPressAction == StemAction.CYCLE_NOISE_CONTROL_MODES) {

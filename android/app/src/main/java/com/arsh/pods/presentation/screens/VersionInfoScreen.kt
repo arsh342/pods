@@ -44,14 +44,14 @@ import com.arsh.pods.presentation.viewmodel.AirPodsViewModel
 fun VersionScreen(viewModel: AirPodsViewModel) {
     val state by viewModel.uiState.collectAsState()    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 12.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
         StyledList(title = stringResource(R.string.version)) {

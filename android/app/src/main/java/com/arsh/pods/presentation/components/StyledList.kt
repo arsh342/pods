@@ -38,8 +38,8 @@ fun StyledList(
             Text(
                 text = it,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 8.dp)
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp)
             )
         }
 
@@ -57,7 +57,7 @@ fun StyledList(
                 text = it,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 8.dp)
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp)
             )
         }
         Spacer(Modifier.height(4.dp))

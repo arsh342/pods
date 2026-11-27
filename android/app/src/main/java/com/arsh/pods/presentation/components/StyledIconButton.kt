@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.RuntimeShader
@@ -107,7 +108,9 @@ fun StyledIconButton(
     backdrop: LayerBackdrop = rememberLayerBackdrop(),
     onClick: () -> Unit,
     enabled: Boolean = true,
-    materialButtonStyle: MaterialButtonStyle = MaterialButtonStyle.Normal
+    materialButtonStyle: MaterialButtonStyle = MaterialButtonStyle.Normal,
+    // False draws the bare icon; the circle behind it fades in when true.
+    raised: Boolean = true
 ) {
     when (LocalDesignSystem.current) {
         DesignSystem.OneUI -> {
@@ -180,7 +183,7 @@ fun StyledIconButton(
             val backgroundColor = if (surfaceColor.isSpecified) {
                 surfaceColor
             } else if (isDarkTheme) {
-                Color(0xFF242426)
+                Color(0xFF252527)
             } else {
                 Color(0xFFE8E8EC)
             }
@@ -190,12 +193,14 @@ fun StyledIconButton(
                 androidx.compose.material3.MaterialTheme.colorScheme.onSurface
             }
 
+            val circle by animateFloatAsState(if (raised) 1f else 0f, label = "button circle")
+
             Box(
                 modifier = modifier
                     .padding(horizontal = 12.dp)
-                    .size(52.dp)
+                    .size(48.dp)
                     .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(backgroundColor)
+                    .background(backgroundColor.copy(alpha = backgroundColor.alpha * circle))
                     .clickable(enabled = enabled, role = Role.Button) {
                         haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
                         onClick()

@@ -51,8 +51,8 @@ fun HearingProtectionScreen(viewModel: AirPodsViewModel) {
     val backdrop = rememberLayerBackdrop()
     val state by viewModel.uiState.collectAsState()    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     Column(
         modifier = Modifier

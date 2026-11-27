@@ -1,5 +1,7 @@
 package com.arsh.pods.presentation.components
 
+import com.arsh.pods.presentation.theme.ListDividerThickness
+import com.arsh.pods.presentation.theme.listDivider
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,7 +33,7 @@ fun StyledListItem(
     name: String,
     onClick: (() -> Unit)?,
     description: String? = null,
-    height: Dp = 64.dp,
+    height: Dp = 54.dp,
     enabled: Boolean = true,
     orientation: ListItemOrientation = ListItemOrientation.Horizontal,
     leadingContent: (@Composable () -> Unit)? = null,
@@ -93,7 +95,7 @@ private fun StyledListItemContent(
     name: String,
     onClick: (() -> Unit)?,
     description: String? = null,
-    height: Dp = 64.dp,
+    height: Dp = 54.dp,
     enabled: Boolean = true,
     index: Int,
     count: Int,
@@ -111,12 +113,12 @@ private fun StyledListItemContent(
                 .then(
                     if (interactive) Modifier.clickable(role = Role.Button, onClick = onClick!!) else Modifier
                 )
-                .padding(horizontal = 16.dp, vertical = if (orientation == ListItemOrientation.Vertical) 12.dp else 8.dp),
+                .padding(horizontal = 20.dp, vertical = if (orientation == ListItemOrientation.Vertical) 12.dp else 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             leadingContent?.let {
                 it()
-                Spacer(Modifier.width(16.dp))
+                Spacer(Modifier.width(20.dp))
             }
 
             Column(
@@ -156,23 +158,14 @@ private fun StyledListItemContent(
                         modifier = Modifier.size(22.dp)
                     )
                 }
-                interactive -> {
-                    Spacer(Modifier.width(12.dp))
-                    Icon(
-                        painter = painterResource(dev.oneuiproject.oneui.R.drawable.ic_oui_arrow_right),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
             }
         }
 
         if (index < count - 1) {
             HorizontalDivider(
                 modifier = Modifier.padding(start = if (leadingContent != null) 68.dp else 20.dp, end = 20.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                thickness = 0.5.dp
+                color = MaterialTheme.colorScheme.listDivider,
+                thickness = ListDividerThickness
             )
         }
     }
@@ -183,7 +176,7 @@ private fun SectionTitle(title: String) {
     Text(
         text = title,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp)
     )
 }

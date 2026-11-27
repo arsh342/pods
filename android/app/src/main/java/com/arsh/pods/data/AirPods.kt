@@ -44,7 +44,10 @@ enum class Capability {
     ADAPTIVE_AUDIO,
     ADAPTIVE_VOLUME,
     SWIPE_FOR_VOLUME,
-    HRM
+    HRM,
+    CUSTOM_EQ,
+    // The charging case has a speaker whose sounds can be switched off.
+    CASE_SOUNDS
 }
 
 class AirPods: AirPodsBase(
@@ -111,6 +114,7 @@ class AirPods4: AirPodsBase(
     // caseRes = R.drawable.airpods_4_case
     caseRes = R.drawable.airpods_pro_2_case,
     capabilities = setOf(
+        Capability.CUSTOM_EQ,
         Capability.HEAD_GESTURES,
         Capability.SLEEP_DETECTION,
         Capability.ADAPTIVE_VOLUME
@@ -131,6 +135,8 @@ class AirPods4ANC: AirPodsBase(
     // caseRes = R.drawable.airpods_4_case
     caseRes = R.drawable.airpods_pro_2_case,
     capabilities = setOf(
+        Capability.CASE_SOUNDS,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,
@@ -155,6 +161,7 @@ class AirPods5: AirPodsBase(
     // caseRes = R.drawable.airpods_5_case
     caseRes = R.drawable.airpods_pro_2_case,
     capabilities = setOf(
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,
@@ -179,6 +186,7 @@ class AirPods5WCC: AirPodsBase(
     // caseRes = R.drawable.airpods_4_case
     caseRes = R.drawable.airpods_pro_2_case,
     capabilities = setOf(
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,
@@ -224,6 +232,8 @@ class AirPodsPro2Lightning: AirPodsBase(
     // caseRes = R.drawable.airpods_pro_2_case
     caseRes = R.drawable.airpods_pro_2_case,
     capabilities = setOf(
+        Capability.CASE_SOUNDS,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.STEM_CONFIG,
@@ -252,6 +262,8 @@ class AirPodsPro2USBC: AirPodsBase(
     // caseRes = R.drawable.airpods_pro_2_case
     caseRes = R.drawable.airpods_pro_2_case,
     capabilities = setOf(
+        Capability.CASE_SOUNDS,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.STEM_CONFIG,
@@ -280,6 +292,8 @@ class AirPodsPro3: AirPodsBase(
     // caseRes = R.drawable.airpods_pro_3_case
     caseRes = R.drawable.airpods_pro_2_case,
     capabilities = setOf(
+        Capability.CASE_SOUNDS,
+        Capability.CUSTOM_EQ,
         Capability.LISTENING_MODE,
         Capability.CONVERSATION_AWARENESS,
         Capability.HEAD_GESTURES,

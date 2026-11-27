@@ -48,15 +48,18 @@ fun HearingHealthSettings(
             )
         }
     } else if (shouldShowHearingAid) {
-        StyledListItem(
-            name = stringResource(R.string.hearing_aid),
-            onClick = navigateToHearingAid
-        )
+        StyledList {
+            StyledListItem(
+                name = stringResource(R.string.hearing_aid),
+                onClick = navigateToHearingAid
+            )
+        }
     } else if (hasPPECapability) {
-        StyledListItem(
-            title = stringResource(R.string.hearing_health),
-            name = stringResource(R.string.hearing_protection),
-            onClick = navigateToHearingProtection
-        )
+        StyledList(title = stringResource(R.string.hearing_health)) {
+            StyledListItem(
+                name = stringResource(R.string.hearing_protection),
+                onClick = navigateToHearingProtection
+            )
+        }
     }
 }

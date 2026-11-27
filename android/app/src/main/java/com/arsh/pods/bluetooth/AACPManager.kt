@@ -1315,7 +1315,9 @@ class AACPManager {
     }
 
     fun sendCustomEqPacket(customEq: CustomEq): Boolean {
-        return sendDataPacket(customEq.toPacket())
+        val sent = sendDataPacket(customEq.toPacket())
+        if (sent) this.customEq = customEq
+        return sent
     }
 
     fun parseCustomEqPacket(packet: ByteArray): CustomEq {
@@ -1336,15 +1338,11 @@ class AACPManager {
         }
 
         val state = data[3].toInt()
-        val low = data[4].toInt()
-        val mid = data[5].toInt()
-        val high = data[6].toInt()
+        val low = data[4].toInt() and 0xFF
+        val mid = data[5].toInt() and 0xFF
+        val high = data[6].toInt() and 0xFF
 
-        return CustomEq(
-            state,
-            low,
-            mid,
-            high
-        )
+        // CustomEq rejects values above 100, and throwing here would drop the connection.
+        return CustomEq(state, low.coerceAtMost(100), mid.coerceAtMost(100), high.coerceAtMost(100))
     }
 }

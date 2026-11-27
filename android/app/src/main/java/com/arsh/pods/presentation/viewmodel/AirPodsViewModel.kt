@@ -48,6 +48,7 @@ import com.arsh.pods.data.Battery
 import com.arsh.pods.data.BatteryComponent
 import com.arsh.pods.data.BatteryStatus
 import com.arsh.pods.data.Capability
+import com.arsh.pods.data.CustomEq
 import com.arsh.pods.data.ControlCommandRepository
 import com.arsh.pods.data.StemAction
 import com.arsh.pods.data.XposedRemotePrefProvider
@@ -93,6 +94,9 @@ data class AirPodsUiState(
     val vendorIdHook: Boolean = false,
 
     val dynamicEndOfCharge: Boolean = false,
+    val caseSounds: Boolean = true,
+
+    val customEq: CustomEq = CustomEq(state = 1, low = 50, mid = 50, high = 50),
 
     val connectionSuccessful: Boolean = false,
 )
@@ -203,6 +207,7 @@ class AirPodsViewModel(
         loadATT()
         observeATT()
         observeSharedPreferences()
+        observeCustomEq()
         if (isDemoMode) activateDemoMode()
         isReady = true
     }
@@ -239,6 +244,30 @@ class AirPodsViewModel(
             controlRepo.remove(id, listener)
         }
         appContext.unregisterReceiver(broadcastReceiver)
+        service.aacpManager.customEqCallback = null
+    }
+
+    private fun observeCustomEq() {
+        service.aacpManager.customEqCallback = { eq ->
+            if (!isDemoMode) _uiState.update { it.copy(customEq = eq) }
+        }
+        // The AirPods may have reported their EQ before this view model existed.
+        _uiState.update { it.copy(customEq = service.aacpManager.customEq) }
+    }
+
+    fun setCustomEqEnabled(enabled: Boolean) {
+        sendCustomEq(_uiState.value.customEq.withEnabled(enabled))
+    }
+
+    fun setCustomEq(low: Int, mid: Int, high: Int) {
+        sendCustomEq(_uiState.value.customEq.withBands(low, mid, high))
+    }
+
+    private fun sendCustomEq(eq: CustomEq) {
+        _uiState.update { it.copy(customEq = eq) }
+        if (!isDemoMode) viewModelScope.launch(Dispatchers.IO) {
+            service.aacpManager.sendCustomEqPacket(eq)
+        }
     }
 
     private fun loadName() {
@@ -434,6 +463,7 @@ class AirPodsViewModel(
         val dynamicEndOfCharge = sharedPreferences.getBoolean("dynamic_end_of_charge", false)
 
         val connectionSuccessful = sharedPreferences.getBoolean("connection_successful", false)
+        val caseSounds = sharedPreferences.getBoolean("case_sounds", true)
 
         _uiState.update {
             it.copy(
@@ -446,6 +476,7 @@ class AirPodsViewModel(
                 vendorIdHook = vendorIdHook,
                 dynamicEndOfCharge = dynamicEndOfCharge,
                 connectionSuccessful = connectionSuccessful,
+                caseSounds = caseSounds,
             )
         }
 
@@ -456,6 +487,14 @@ class AirPodsViewModel(
         setControlCommandBoolean(ControlCommandIdentifiers.ALLOW_OFF_OPTION, enabled)
         _uiState.update {
             it.copy(offListeningMode = enabled)
+        }
+    }
+
+    fun setCaseSounds(enabled: Boolean) {
+        setControlCommandBoolean(ControlCommandIdentifiers.IN_CASE_TONE_CONFIG, enabled)
+        sharedPreferences.edit { putBoolean("case_sounds", enabled) }
+        _uiState.update {
+            it.copy(caseSounds = enabled)
         }
     }
 

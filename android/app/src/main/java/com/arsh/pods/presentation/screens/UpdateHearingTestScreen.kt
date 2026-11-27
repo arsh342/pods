@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.theme.appFontFamily
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -79,8 +80,8 @@ private const val TAG = "UpdateHearingTestScreen"
 fun UpdateHearingTestRoute(viewModel: AirPodsViewModel) {
     val state by viewModel.uiState.collectAsState()    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     Box(
         modifier = Modifier
@@ -262,7 +263,7 @@ fun UpdateHearingTestScreen(
 //                        label = { Text("Value", fontSize = MaterialTheme.typography.bodyMedium.fontSize, fontFamily = FontFamily(Font(R.font.sf_pro))) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     textStyle = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.sf_pro)),
+                        fontFamily = FontFamily.Default,
                         fontSize = MaterialTheme.typography.bodyMedium.fontSize
                     ),
                     modifier = Modifier.weight(1f)
@@ -281,7 +282,7 @@ fun UpdateHearingTestScreen(
 //                        label = { Text("Value", fontSize = MaterialTheme.typography.bodyMedium.fontSize, fontFamily = FontFamily(Font(R.font.sf_pro))) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     textStyle = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.sf_pro)),
+                        fontFamily = FontFamily.Default,
                         fontSize = MaterialTheme.typography.bodyMedium.fontSize
                     ),
                     modifier = Modifier.weight(1f)

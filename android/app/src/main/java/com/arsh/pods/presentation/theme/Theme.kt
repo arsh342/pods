@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.theme
 
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -27,8 +28,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 
+/** The line between rows of a list block. */
+val ColorScheme.listDivider: Color
+    get() = onSurface.copy(alpha = 0.16f)
+
+val ListDividerThickness = 0.7.dp
+
 val ColorScheme.sectionHeader: Color
-    get() = onSurfaceVariant.copy(alpha = 0.6f)
+    get() = onSurfaceVariant
 
 val ColorScheme.connectedColor: Color
     get() = if (isLight) ConnectedBlue else ConnectedBlueLight

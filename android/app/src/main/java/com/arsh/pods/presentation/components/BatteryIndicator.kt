@@ -191,6 +191,7 @@ fun BatteryIndicator(
             color = batteryTextColor,
             style = TextStyle(
                 fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                // The prefix can be an SF Symbols character, which only the bundled font draws.
                 fontFamily = FontFamily(Font(R.font.sf_pro)),
                 textAlign = TextAlign.Center
             ),

@@ -20,10 +20,11 @@
 
 package com.arsh.pods.presentation.components
 
+import com.arsh.pods.presentation.theme.appFontFamily
+import com.arsh.pods.presentation.theme.ListDividerThickness
+import com.arsh.pods.presentation.theme.listDivider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,16 +53,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import com.arsh.pods.R
 import com.arsh.pods.presentation.theme.DesignSystem
 import com.arsh.pods.presentation.theme.PodsTheme
 import com.arsh.pods.presentation.theme.LocalDesignSystem
@@ -84,13 +81,13 @@ fun StyledToggle(
             Box(
                 modifier = Modifier
                     .background(if (m3eEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 20.dp)
                     .padding(top = 4.dp, bottom = if (m3eEnabled) 12.dp else 4.dp)
             ) {
                 Text(
                     text = it,
                     color = if (m3eEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.sectionHeader,
-                    style = MaterialTheme.typography.labelSmallEmphasized
+                    style = MaterialTheme.typography.titleSmallEmphasized
                 )
             }
         }
@@ -128,11 +125,10 @@ fun StyledToggle(
         if (description != null && !m3eEnabled) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = description, style = TextStyle(
+                text = description, style = TextStyle(fontFamily = appFontFamily, 
                     fontSize = MaterialTheme.typography.labelMedium.fontSize,
                     color = MaterialTheme.colorScheme.onBackground.copy(0.6f),
-                    fontFamily = FontFamily(Font(R.font.sf_pro)),
-                ), modifier = Modifier.padding(horizontal = 16.dp)
+                ), modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
     }
@@ -172,9 +168,6 @@ private fun StyledToggleContent(
     header: Boolean = false
 ) {
     val currentChecked by rememberUpdatedState(checked)
-
-    val isDarkTheme = isSystemInDarkTheme()
-    val textColor = if (isDarkTheme) Color.White else Color.Black
 
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
@@ -253,34 +246,16 @@ private fun StyledToggleContent(
             }
         }
     } else {
-        val isPressed = remember { mutableStateOf(false) }
         Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        shape = RoundedCornerShape(28.dp),
-                        color = if (isPressed.value) Color(0xFFE0E0E0) else Color.Transparent
-                    )
-                    .padding(16.dp)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                isPressed.value = true
-                                tryAwaitRelease()
-                                isPressed.value = false
-                            }
-                        )
+                    .clickable(enabled = enabled) {
+                        scope.launch { haptics.performHapticFeedback(if (!currentChecked) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff) }
+                        onCheckedChange(!currentChecked)
                     }
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) {
-                        if (enabled) {
-                            scope.launch { haptics.performHapticFeedback(if (!currentChecked) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff) }
-                            onCheckedChange(!currentChecked)
-                        }
-                    },
+                    .heightIn(min = 54.dp)
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
@@ -291,15 +266,15 @@ private fun StyledToggleContent(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = textColor,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
 
                     if (description != null) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = textColor.copy(0.8f)
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -316,10 +291,10 @@ private fun StyledToggleContent(
             }
             if (index+1 != count) {
                 HorizontalDivider(
-                    thickness = 1.dp,
-                    color = Color(0x40888888),
+                    thickness = ListDividerThickness,
+                    color = MaterialTheme.colorScheme.listDivider,
                     modifier = Modifier
-                        .padding(start = 12.dp,end = 12.dp)
+                        .padding(start = 20.dp, end = 20.dp)
                 )
             }
         }

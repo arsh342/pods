@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.theme.appFontFamily
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
@@ -47,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -90,8 +90,8 @@ fun HearingAidScreen(viewModel: AirPodsViewModel, onNavigateHearingAidAdjustment
         mutableStateOf((aidStatus?.getOrNull(1) == 0x01.toByte()) && (assistStatus?.getOrNull(0) == 0x01.toByte()))
     }    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     Column(
         modifier = Modifier
@@ -99,7 +99,7 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(verticalScrollState)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
@@ -145,16 +145,18 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
                 fontSize = MaterialTheme.typography.labelMedium.fontSize,
                 fontWeight = FontWeight.Light,
                 color = (if (isSystemInDarkTheme()) Color.White else Color.Black).copy(alpha = 0.6f),
-                fontFamily = FontFamily(Font(R.font.sf_pro))
+                fontFamily = FontFamily.Default
             ),
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        StyledListItem(
-            name = stringResource(R.string.update_hearing_test),
-            onClick = onNavigateHearingTest,
-        )
+        StyledList {
+            StyledListItem(
+                name = stringResource(R.string.update_hearing_test),
+                onClick = onNavigateHearingTest,
+            )
+        }
 
         // not implemented yet
 
@@ -233,7 +235,6 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
         onDismiss = {
             hearingAidEnabled.value = false
             showDialog.value = false
-        },
-         backdrop = backdrop
+        }
     )
 }

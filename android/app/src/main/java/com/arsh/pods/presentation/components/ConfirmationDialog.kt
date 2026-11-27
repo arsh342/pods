@@ -25,7 +25,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +34,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidthIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,15 +52,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import com.kyant.backdrop.backdrops.LayerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.blur
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import com.arsh.pods.R
 import com.arsh.pods.presentation.theme.DesignSystem
@@ -77,7 +71,6 @@ fun ConfirmationDialog(
     dismissText: String = "Cancel",
     onConfirm: () -> Unit,
     onDismiss: () -> Unit = { showDialog.value = false },
-    backdrop: LayerBackdrop,
 ) {
     AnimatedVisibility(
         visible = showDialog.value,
@@ -131,59 +124,46 @@ fun ConfirmationDialog(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    val innerBackdrop = rememberLayerBackdrop()
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.Black.copy(alpha = 0.4f))
                             .clickable(enabled = false, onClick = {}),
-                        contentAlignment = Alignment.Center
+                        // One UI keeps dialogs within thumb reach, at the bottom.
+                        contentAlignment = Alignment.BottomCenter
                     ) {
-                        val isDarkTheme = isSystemInDarkTheme()
                         Box(
                             modifier = Modifier
-                                .requiredWidthIn(min = 200.dp, max = 360.dp)
-                                .clip(RoundedCornerShape(48.dp))
-                                .drawBackdrop(
-                                    backdrop = backdrop,
-                                    exportedBackdrop = innerBackdrop,
-                                    shape = { RoundedCornerShape(48.dp) },
-                                    effects = {
-                                        blur(12f.dp.toPx())
-                                    },
-                                    onDrawSurface = {
-                                        drawRect(
-                                            if (isDarkTheme) Color(0xFF1F1F1F).copy(alpha = 0.35f) else Color(
-                                                0xFFE0E0E0
-                                            ).copy(alpha = 0.7f)
-                                        )
-                                    })
+                                .navigationBarsPadding()
+                                .padding(12.dp)
+                                .widthIn(max = 420.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(28.dp))
+                                .background(MaterialTheme.colorScheme.surface)
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column {
                                 Spacer(modifier = Modifier.height(24.dp))
                                 Text(
                                     title,
                                     style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                    modifier = Modifier.padding(horizontal = 24.dp)
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     message,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                    modifier = Modifier.padding(horizontal = 24.dp)
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(0.9f),
-                                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     StyledButton(
                                         onClick = onDismiss,
-                                        backdrop = innerBackdrop,
                                         modifier = Modifier.weight(1f),
-                                        materialButtonStyle = MaterialButtonStyle.Outlined,
                                     ) {
                                         Text(
                                             text = dismissText,
@@ -192,9 +172,7 @@ fun ConfirmationDialog(
                                     }
                                     StyledButton(
                                         onClick = onConfirm,
-                                        backdrop = innerBackdrop,
                                         modifier = Modifier.weight(1f),
-                                        materialButtonStyle = MaterialButtonStyle.Filled,
                                         surfaceColor = MaterialTheme.colorScheme.primary
                                     ) {
                                         Text(

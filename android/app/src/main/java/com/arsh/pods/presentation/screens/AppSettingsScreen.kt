@@ -18,6 +18,10 @@
 
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.components.ListItemOrientation
+import com.arsh.pods.presentation.components.StyledListItem
+import android.provider.Settings
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -60,7 +64,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -81,8 +84,6 @@ import com.arsh.pods.presentation.components.StyledSlider
 import com.arsh.pods.presentation.components.StyledToggle
 import com.arsh.pods.presentation.MaterialIcons
 import com.arsh.pods.presentation.theme.OneUITypography
-import com.arsh.pods.presentation.theme.DesignSystem
-import com.arsh.pods.presentation.theme.LocalDesignSystem
 import com.arsh.pods.presentation.viewmodel.AppSettingsViewModel
 import com.arsh.pods.utils.XposedState
 import java.util.concurrent.TimeUnit
@@ -100,10 +101,9 @@ fun AppSettingsScreen(
 
     val backdrop = rememberLayerBackdrop()
 
-    val isAppleDesign = LocalDesignSystem.current == DesignSystem.Apple
     val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
-        if (isAppleDesign) 60.dp else 84.dp
-    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+        64.dp
+    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     Column(
         modifier = Modifier
@@ -137,7 +137,7 @@ fun AppSettingsScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .padding(horizontal = 20.dp, vertical = 8.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.conversational_awareness_volume),
@@ -242,7 +242,7 @@ fun AppSettingsScreen(
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 12.dp)
                     .padding(top = 16.dp, bottom = 2.dp)
             ) {
                 Text(
@@ -271,20 +271,35 @@ fun AppSettingsScreen(
             )
         }
 
+        StyledList {
+            StyledListItem(
+                name = stringResource(R.string.hide_background_notification),
+                description = stringResource(R.string.hide_background_notification_description),
+                orientation = ListItemOrientation.Vertical,
+                onClick = {
+                    context.startActivity(
+                        Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            .putExtra(Settings.EXTRA_CHANNEL_ID, "background_service_status")
+                    )
+                }
+            )
+        }
+
         Spacer(modifier = Modifier.height(bottomPadding))
 
         if (state.showCameraDialog) {
             AlertDialog(onDismissRequest = { viewModel.setShowCameraDialog(false) }, title = {
                 Text(
                     stringResource(R.string.set_custom_camera_package),
-                    fontFamily = FontFamily(Font(R.font.sf_pro)),
+                    fontFamily = FontFamily.Default,
                     fontWeight = FontWeight.Medium
                 )
             }, text = {
                 Column {
                     Text(
                         stringResource(R.string.enter_custom_camera_package),
-                        fontFamily = FontFamily(Font(R.font.sf_pro)),
+                        fontFamily = FontFamily.Default,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
@@ -325,7 +340,7 @@ fun AppSettingsScreen(
                     }) {
                     Text(
                         "Save",
-                        fontFamily = FontFamily(Font(R.font.sf_pro)),
+                        fontFamily = FontFamily.Default,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -334,7 +349,7 @@ fun AppSettingsScreen(
                     onClick = { viewModel.setShowCameraDialog(false) }) {
                     Text(
                         "Cancel",
-                        fontFamily = FontFamily(Font(R.font.sf_pro)),
+                        fontFamily = FontFamily.Default,
                         fontWeight = FontWeight.Medium
                     )
                 }

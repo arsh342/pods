@@ -63,7 +63,6 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
-import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
@@ -102,13 +101,16 @@ import com.arsh.pods.data.StemAction
 import com.arsh.pods.data.XposedRemotePrefProvider
 import com.arsh.pods.data.isHeadTrackingData
 import com.arsh.pods.presentation.widgets.BatteryWidget
+import com.arsh.pods.presentation.widgets.BatteryWidgetRenderer
 import com.arsh.pods.utils.GestureDetector
 import com.arsh.pods.utils.HeadTracking
 import com.arsh.pods.utils.MediaController
+import com.arsh.pods.utils.nextBatteryAlert
 import com.arsh.pods.utils.SystemApisUtils
 import com.arsh.pods.utils.SystemApisUtils.DEVICE_TYPE_UNTETHERED_HEADSET
 import com.arsh.pods.utils.SystemApisUtils.METADATA_COMPANION_APP
 import com.arsh.pods.utils.SystemApisUtils.METADATA_DEVICE_TYPE
+import com.arsh.pods.utils.useProfileProxy
 
 import com.arsh.pods.utils.SystemApisUtils.METADATA_MAIN_ICON
 import com.arsh.pods.utils.SystemApisUtils.METADATA_MANUFACTURER_NAME
@@ -158,8 +160,6 @@ object ServiceManager {
 
 // @Suppress("unused")
 class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
-    private val batteryAlertsSent = mutableMapOf<Int, MutableSet<Int>>()
-    private val lastBatteryLevels = mutableMapOf<Int, Int>()
     var macAddress = ""
     var localMac = ""
     lateinit var aacpManager: AACPManager
@@ -818,6 +818,18 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         action: StemAction?, default: StemAction?
     ): Boolean {
         return action != default
+    }
+
+    /**
+     * AirPods do not report whether their case sounds are on, and another device may have changed it,
+     * so a choice made in Pods is sent again on every connection. Nothing is sent until one is made.
+     */
+    private fun sendCaseSoundsChoice() {
+        if (!sharedPreferences.contains("case_sounds")) return
+        aacpManager.sendControlCommand(
+            AACPManager.Companion.ControlCommandIdentifiers.IN_CASE_TONE_CONFIG.value,
+            sharedPreferences.getBoolean("case_sounds", true)
+        )
     }
 
     fun setupStemActions() {
@@ -1720,7 +1732,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             "AirPods Low Battery",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Alerts when an AirPod or the charging case reaches 10% or 5% battery"
+            description = "Alerts when an AirPod or the charging case reaches 10%, 5%, 2% or 1% battery"
         }
 
         val notificationManager = getSystemService(NotificationManager::class.java)
@@ -1742,8 +1754,8 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         )
 
         val notification = NotificationCompat.Builder(this, "background_service_status")
-            .setSmallIcon(R.drawable.airpods).setContentTitle("Background Service Running")
-            .setContentText("Useless notification, disable it by clicking on it.")
+            .setSmallIcon(R.drawable.airpods).setContentTitle("Pods is running")
+            .setContentText("Tap to hide this notification.")
             .setContentIntent(pendingIntentNotifDisable).setCategory(Notification.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_LOW).setOngoing(true).build()
 
@@ -1860,53 +1872,11 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     fun updateBatteryWidget() {
         val appWidgetManager = AppWidgetManager.getInstance(this)
-        val componentName = ComponentName(this, BatteryWidget::class.java)
-        val widgetIds = appWidgetManager.getAppWidgetIds(componentName)
-
-        val remoteViews = RemoteViews(packageName, R.layout.battery_widget).also { it ->
-            val openActivityIntent = PendingIntent.getActivity(
-                this,
-                0,
-                Intent(this, MainActivity::class.java),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            it.setOnClickPendingIntent(R.id.battery_widget, openActivityIntent)
-
-            val leftBattery =
-                batteryNotification.getBattery().find { it.component == BatteryComponent.LEFT }
-            val rightBattery =
-                batteryNotification.getBattery().find { it.component == BatteryComponent.RIGHT }
-            val caseBattery =
-                batteryNotification.getBattery().find { it.component == BatteryComponent.CASE }
-
-            it.setProgressBar(
-                R.id.left_battery_progress, 100, leftBattery?.level ?: 0, false
-            )
-            it.setViewVisibility(
-                R.id.left_charging_icon,
-                if (leftBattery?.status == BatteryStatus.CHARGING || leftBattery?.status == BatteryStatus.OPTIMIZED_CHARGING) View.VISIBLE else View.GONE
-            )
-
-            it.setProgressBar(
-                R.id.right_battery_progress, 100, rightBattery?.level ?: 0, false
-            )
-            it.setViewVisibility(
-                R.id.right_charging_icon,
-                if (rightBattery?.status == BatteryStatus.CHARGING || rightBattery?.status == BatteryStatus.OPTIMIZED_CHARGING ) View.VISIBLE else View.GONE
-            )
-
-            it.setProgressBar(
-                R.id.case_battery_progress, 100, caseBattery?.level ?: 0, false
-            )
-            it.setViewVisibility(
-                R.id.case_charging_icon,
-                if (caseBattery?.status == BatteryStatus.CHARGING || caseBattery?.status == BatteryStatus.OPTIMIZED_CHARGING ) View.VISIBLE else View.GONE
-            )
-        }
-        appWidgetManager.updateAppWidget(widgetIds, remoteViews)
+        val widgetIds =
+            appWidgetManager.getAppWidgetIds(ComponentName(this, BatteryWidget::class.java))
+        BatteryWidgetRenderer.update(this, appWidgetManager, widgetIds, batteryNotification.getBattery())
     }
 
     @SuppressLint("MissingPermission")
@@ -1929,27 +1899,21 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Persisted, so a service restart does not repeat an alert.
+        val sent = getSharedPreferences("low_battery", MODE_PRIVATE)
+
         batteryNotification.getBattery().forEach { battery ->
-            if (battery.status == BatteryStatus.DISCONNECTED) {
-                lastBatteryLevels.remove(battery.component)
-                return@forEach
-            }
-            if (battery.level > 10) batteryAlertsSent.remove(battery.component)
+            if (battery.status == BatteryStatus.DISCONNECTED) return@forEach
 
-            val previousLevel = lastBatteryLevels.put(battery.component, battery.level)
-            if (battery.level !in 0..10 || battery.status == BatteryStatus.CHARGING ||
+            val key = "component_${battery.component}"
+            val lowestSent = sent.getInt(key, -1).takeIf { it >= 0 }
+            val charging = battery.status == BatteryStatus.CHARGING ||
                 battery.status == BatteryStatus.OPTIMIZED_CHARGING
-            ) return@forEach
-
-            val sentThresholds = batteryAlertsSent.getOrPut(battery.component) { mutableSetOf() }
-            val crossedTenPercent = previousLevel != null && previousLevel > 10 && battery.level <= 10
-            val crossedFivePercent = previousLevel != null && previousLevel > 5 && battery.level <= 5
-            val firstObservedAtTen = previousLevel == null && battery.level in 6..10
-            val firstObservedAtFive = previousLevel == null && battery.level in 0..5
-            val thresholdsToNotify = buildList {
-                if (10 !in sentThresholds && (crossedTenPercent || firstObservedAtTen)) add(10)
-                if (5 !in sentThresholds && (crossedFivePercent || firstObservedAtFive)) add(5)
+            val decision = nextBatteryAlert(battery.level, charging, lowestSent)
+            if (decision.lowestSent != lowestSent) {
+                sent.edit { putInt(key, decision.lowestSent ?: -1) }
             }
+            if (decision.notify == null) return@forEach
 
             val componentName = when (battery.component) {
                 BatteryComponent.LEFT -> "Left AirPod"
@@ -1957,18 +1921,16 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 BatteryComponent.CASE -> "Charging case"
                 else -> "AirPods"
             }
-            thresholdsToNotify.forEach { threshold ->
-                val notification = NotificationCompat.Builder(this, LOW_BATTERY_NOTIFICATION_CHANNEL)
-                    .setSmallIcon(R.drawable.airpods)
-                    .setContentTitle("AirPods battery at $threshold%")
-                    .setContentText("$componentName battery is at ${battery.level}%")
-                    .setContentIntent(pendingIntent)
-                    .setCategory(Notification.CATEGORY_STATUS)
-                    .setAutoCancel(true)
-                    .build()
-                notificationManager.notify(500 + battery.component * 10 + threshold, notification)
-                sentThresholds.add(threshold)
-            }
+            val notification = NotificationCompat.Builder(this, LOW_BATTERY_NOTIFICATION_CHANNEL)
+                .setSmallIcon(R.drawable.airpods)
+                .setContentTitle("AirPods battery at ${battery.level}%")
+                .setContentText("$componentName battery is at ${battery.level}%")
+                .setContentIntent(pendingIntent)
+                .setCategory(Notification.CATEGORY_STATUS)
+                .setAutoCancel(true)
+                .build()
+            // One slot per component: a newer, lower alert replaces the previous one.
+            notificationManager.notify(500 + battery.component, notification)
         }
     }
 
@@ -1990,7 +1952,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             return
         }
         if (BluetoothConnectionManager.aacpSocket?.isConnected == true) {
-            // Battery percentages are shown only in the 10% and 5% low-battery alerts.
+            // Battery percentages are shown only in the low-battery alerts.
             // Keep the service notification (ID 1) and remove the always-on battery status notification.
             notificationManager.cancel(2)
         } else if (!connected) {
@@ -2666,6 +2628,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                             })
 
                     setupStemActions()
+                    sendCaseSoundsChoice()
 
                     while (socket.isConnected) {
                         try {
@@ -2913,39 +2876,26 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
         bluetoothAdapter?.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-                if (profile == BluetoothProfile.A2DP) {
-                    if (context.checkSelfPermission("android.permission.BLUETOOTH_PRIVILEGED") == PackageManager.PERMISSION_GRANTED) {
-                        try {
-                            val policyMethod = proxy.javaClass.getMethod(
-                                "setConnectionPolicy",
-                                BluetoothDevice::class.java,
-                                Int::class.java
-                            )
-                            Log.d(TAG, "calling A2DP.setConnectionPolicy for ${device?.address} to 100")
-                            policyMethod.invoke(proxy, device, 100)
-
-                            val connectMethod =
-                                proxy.javaClass.getMethod("connect", BluetoothDevice::class.java)
-                            connectMethod.invoke(
-                                proxy, device
-                            )
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        } finally {
-                            bluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, proxy)
-                            if (MediaController.pausedWhileTakingOver) {
-                                MediaController.sendPlay()
-                            }
-                        }
-                    }
-                    else {
-                        val connectMethod =
-                            proxy.javaClass.getMethod("connect", BluetoothDevice::class.java)
-                        connectMethod.invoke(
-                            proxy, device
+                if (profile != BluetoothProfile.A2DP) return
+                val privileged =
+                    context.checkSelfPermission("android.permission.BLUETOOTH_PRIVILEGED") == PackageManager.PERMISSION_GRANTED
+                useProfileProxy(
+                    close = { bluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, proxy) },
+                    onError = { Log.w(TAG, "could not connect A2DP: $it") }
+                ) {
+                    if (privileged) {
+                        val policyMethod = proxy.javaClass.getMethod(
+                            "setConnectionPolicy", BluetoothDevice::class.java, Int::class.java
                         )
-                        Log.d(TAG, "not setting connection policy for A2DP, no BLUETOOTH_PRIVILEGED permission. just called connect")
+                        Log.d(TAG, "calling A2DP.setConnectionPolicy for ${device?.address} to 100")
+                        policyMethod.invoke(proxy, device, 100)
                     }
+                    val connectMethod =
+                        proxy.javaClass.getMethod("connect", BluetoothDevice::class.java)
+                    connectMethod.invoke(proxy, device)
+                }
+                if (privileged && MediaController.pausedWhileTakingOver) {
+                    MediaController.sendPlay()
                 }
             }
 
@@ -2954,27 +2904,20 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
         bluetoothAdapter?.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-                if (profile == BluetoothProfile.HEADSET) {
+                if (profile != BluetoothProfile.HEADSET) return
+                useProfileProxy(
+                    close = { bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, proxy) },
+                    onError = { Log.w(TAG, "could not connect HEADSET: $it") }
+                ) {
                     if (checkSelfPermission("android.permission.MODIFY_PHONE_STATE") == PackageManager.PERMISSION_GRANTED) {
-                        try {
-                            val policyMethod = proxy.javaClass.getMethod(
-                                "setConnectionPolicy",
-                                BluetoothDevice::class.java,
-                                Int::class.java
-                            )
-                            Log.d(
-                                TAG,
-                                "calling HEADSET.setConnectionPolicy for ${device?.address} to 100"
-                            )
-                            policyMethod.invoke(proxy, device, 100)
-                            val connectMethod =
-                                proxy.javaClass.getMethod("connect", BluetoothDevice::class.java)
-                            connectMethod.invoke(proxy, device)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        } finally {
-                            bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, proxy)
-                        }
+                        val policyMethod = proxy.javaClass.getMethod(
+                            "setConnectionPolicy", BluetoothDevice::class.java, Int::class.java
+                        )
+                        Log.d(TAG, "calling HEADSET.setConnectionPolicy for ${device?.address} to 100")
+                        policyMethod.invoke(proxy, device, 100)
+                        val connectMethod =
+                            proxy.javaClass.getMethod("connect", BluetoothDevice::class.java)
+                        connectMethod.invoke(proxy, device)
                     } else {
                         Log.d(TAG, "not setting connection policy for HEADSET, no MODIFIY_PHONE_STATE permission")
                     }

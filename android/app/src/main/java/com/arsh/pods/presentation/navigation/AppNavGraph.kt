@@ -1,5 +1,6 @@
 package com.arsh.pods.presentation.navigation
 
+import androidx.compose.foundation.ScrollState
 import androidx.activity.BackEventCompat.Companion.EDGE_LEFT
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -27,6 +28,7 @@ import com.arsh.pods.presentation.screens.HearingAidScreen
 import com.arsh.pods.presentation.screens.HearingProtectionScreen
 import com.arsh.pods.presentation.screens.LoadingScreen
 import com.arsh.pods.presentation.screens.LongPress
+import com.arsh.pods.presentation.screens.EqualizerScreen
 import com.arsh.pods.presentation.screens.MicrophoneSettingsRoute
 import com.arsh.pods.presentation.screens.OpenSourceLicensesScreen
 import com.arsh.pods.presentation.screens.RenameScreen
@@ -40,10 +42,16 @@ import com.arsh.pods.presentation.viewmodel.AppSettingsViewModel
 fun AppNavGraph(
     backStack: SnapshotStateList<Screen>,
     airPodsViewModel: AirPodsViewModel,
+    currentTab: () -> MainTab,
+    scrollState: (MainTab) -> ScrollState,
+    pageFrame: @Composable (Screen, @Composable () -> Unit) -> Unit,
 ) {
     val navigate: (Screen) -> Unit = { screen ->
         backStack.add(screen)
     }
+
+    fun page(screen: Screen, content: @Composable () -> Unit) =
+        NavEntry(screen) { pageFrame(screen, content) }
 
     SharedTransitionLayout {
         NavDisplay(
@@ -57,10 +65,14 @@ fun AppNavGraph(
             entryProvider = { screen ->
                 when (screen) {
                     Screen.AirPodsSettings ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
+                            val tab = currentTab()
                             AirPodsSettingsRoute(
                                 viewModel = airPodsViewModel,
+                                tab = tab,
+                                scrollState = scrollState(tab),
+                                navigateToAppSettings = { navigate(Screen.AppSettings) },
                                 navigateToRename = { navigate(Screen.Rename) },
                                 navigateToHearingProtection = { navigate(Screen.HearingProtection) },
                                 navigateToHearingAid = { navigate(Screen.HearingAid) },
@@ -80,17 +92,18 @@ fun AppNavGraph(
                                 navigateToVersion = { navigate(Screen.VersionInfo) },
                                 navigateToCallControlScreen = { navigate(Screen.CallControl(it)) },
                                 navigateToMicrophoneSettings = { navigate(Screen.MicrophoneSettings) },
+                                navigateToEqualizer = { navigate(Screen.Equalizer) },
                             )
                         }
 
                     Screen.Rename ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             RenameScreen(airPodsViewModel)
                         }
 
                     Screen.AppSettings ->
-                        NavEntry(screen) {
+                        page(screen) {
                             val vm: AppSettingsViewModel = viewModel()
                             AppSettingsScreen(
                                 viewModel = vm,
@@ -99,13 +112,13 @@ fun AppNavGraph(
                         }
 
                     Screen.HeadTracking ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             HeadTrackingScreen(airPodsViewModel)
                         }
 
                     Screen.Accessibility ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             AccessibilitySettingsScreen(
                                 viewModel = airPodsViewModel,
@@ -114,13 +127,13 @@ fun AppNavGraph(
                         }
 
                     Screen.TransparencyCustomization ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             TransparencySettingsScreen(airPodsViewModel)
                         }
 
                     Screen.HearingAid ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             HearingAidScreen(
                                 viewModel = airPodsViewModel,
@@ -130,35 +143,35 @@ fun AppNavGraph(
                         }
 
                     Screen.HearingAidAdjustments ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             HearingAidAdjustmentsScreen(airPodsViewModel)
                         }
 
                     Screen.AdaptiveStrength ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             AdaptiveStrengthScreen(airPodsViewModel)
                         }
 
                     Screen.OpenSourceLicenses ->
-                        NavEntry(screen) {
+                        page(screen) {
                             OpenSourceLicensesScreen()
                         }
 
                     Screen.UpdateHearingTest ->
-                        NavEntry(screen) {
+                        page(screen) {
                             UpdateHearingTestRoute(airPodsViewModel)
                         }
 
                     Screen.VersionInfo ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             VersionScreen(airPodsViewModel)
                         }
 
                     Screen.HearingProtection ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             HearingProtectionScreen(
                                 viewModel = airPodsViewModel,
@@ -166,7 +179,7 @@ fun AppNavGraph(
                         }
 
                     is Screen.LongPress ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             LongPress(
                                 viewModel = airPodsViewModel,
@@ -175,7 +188,7 @@ fun AppNavGraph(
                         }
 
                     is Screen.CallControl ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             CallControlScreen(
                                 viewModel = airPodsViewModel,
@@ -192,8 +205,14 @@ fun AppNavGraph(
                             )
                         }
 
+                    Screen.Equalizer ->
+                        page(screen) {
+                            if (!airPodsViewModel.isReady) LoadingScreen()
+                            else EqualizerScreen(airPodsViewModel)
+                        }
+
                     is Screen.MicrophoneSettings ->
-                        NavEntry(screen) {
+                        page(screen) {
                             if (!airPodsViewModel.isReady) LoadingScreen()
                             MicrophoneSettingsRoute(viewModel = airPodsViewModel)
                         }

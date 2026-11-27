@@ -1,5 +1,6 @@
 package com.arsh.pods.presentation.components
 
+import com.arsh.pods.presentation.theme.appFontFamily
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.updateTransition
@@ -72,7 +73,7 @@ fun StyledInputField(
     }
     else {
         val isDarkTheme = isSystemInDarkTheme()
-        val backgroundColor = if (isDarkTheme) Color(0xFF1C1C1E) else Color(0xFFFFFFFF)
+        val backgroundColor = MaterialTheme.colorScheme.surface
         val textColor = if (isDarkTheme) Color.White else Color.Black
         val minHeight = if (singleLine) 58.dp else 120.dp
         val verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top
@@ -115,7 +116,7 @@ fun StyledInputField(
                     textStyle = TextStyle(
                         fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                         color = textColor,
-                        fontFamily = FontFamily(Font(R.font.sf_pro))
+                        fontFamily = FontFamily.Default
                     ),
                     cursorBrush = SolidColor(textColor),
                     decorator = { innerTextField ->
@@ -137,7 +138,7 @@ fun StyledInputField(
                                         style = TextStyle(
                                             fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                                             fontWeight = FontWeight.Light,
-                                            fontFamily = FontFamily(Font(R.font.sf_pro)),
+                                            fontFamily = FontFamily.Default,
                                             color = textColor.copy(alpha = 0.8f)
                                         ),
                                         modifier = Modifier

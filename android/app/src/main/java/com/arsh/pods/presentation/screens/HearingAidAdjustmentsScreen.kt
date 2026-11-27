@@ -141,15 +141,15 @@ fun HearingAidAdjustmentsScreen(viewModel: AirPodsViewModel) {
         sendHearingAidSettings(state.hearingAidData, hearingAidSettings.value, debounceJob, viewModel::setATTCharacteristicValue)
     }    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(verticalScrollState)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))

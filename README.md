@@ -9,13 +9,13 @@ Pods is an independent community project. It is not affiliated with or endorsed 
 Available controls depend on the AirPods model, firmware, Android version, and Bluetooth capabilities reported by the device. Unsupported controls are hidden.
 
 - Connect to AirPods and reconnect to the last saved device.
-- View earbud and case battery levels in the app, with a home-screen battery widget and Quick Settings noise-control tile.
-- Receive low-battery alerts when an earbud or case reaches 10% or 5%.
+- View earbud and case battery levels in the app, with a resizable home-screen battery widget (rings turn red at 10% or below) and Quick Settings noise-control tile.
+- Receive one low-battery alert each when an earbud or case reaches 10%, 5%, 2%, and 1%.
 - Change supported listening modes, including noise cancellation, transparency, adaptive audio, and off mode where available.
 - Configure press-and-hold actions, call controls, microphone selection, automatic ear detection, and automatic connection.
 - Adjust supported audio and accessibility features, including conversational awareness, adaptive volume, loud sound reduction, hearing protection, hearing aid, and head gestures.
 - Configure optimized charging and supported sleep detection settings.
-- Open Android or Samsung Sound quality and effects settings for the system equalizer. Pods does not include a custom equalizer or process audio.
+- Adjust the AirPods' own low, mid, and high equalizer on supported models, or open Android or Samsung Sound quality and effects settings. Pods does not process audio.
 - Configure supported connection takeover behavior and advanced options in App Settings.
 - View app and open-source license information.
 
@@ -29,9 +29,11 @@ Some hearing and accessibility features require compatible AirPods and firmware.
 
 On first launch, the app opens directly to the main screen and requests the Android permissions it needs. These can include nearby-device Bluetooth access, notifications, and phone-state/call permissions for related controls. Grant only the permissions you want the corresponding features to use.
 
+Android shows a silent notification while the background service runs. Pods cannot hide it by itself: tap it, or use the row for it in App settings, and turn the channel off. The service keeps running.
+
 ## Build
 
-Open the `android` directory in Android Studio, or build from a terminal with JDK 21 and the Android SDK installed. The project uses Android SDK 37 and NDK 30.0.14904198.
+Open the `android` directory in Android Studio, or build from a terminal with JDK 21 and the Android SDK installed. The project uses Android SDK 37 and NDK 30.0.16248370 with CMake 4.1.2.
 
 From the `android` directory:
 

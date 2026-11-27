@@ -1,5 +1,6 @@
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.components.SegmentedSelector
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,8 +36,8 @@ import com.arsh.pods.presentation.viewmodel.AirPodsViewModel
 fun CallControlScreen(viewModel: AirPodsViewModel, action: String, onCallControlValueChanged: (Boolean) -> Unit) {
     val state by viewModel.uiState.collectAsState()    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     val scrollState = rememberScrollState()
 
@@ -65,29 +66,18 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(scrollState)
             .padding(top = 8.dp)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 12.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
-        StyledList {
-            StyledListItem(
-                name = pressOnceText,
-                selected = pressOnceIsAction,
-                onClick = {
-                    singlePressAction = pressOnceText
-                    onCallControlValueChanged(flippedValue)
-                }
-            )
-
-            StyledListItem(
-                name = pressTwiceText,
-                selected = !pressOnceIsAction,
-                onClick = {
-                    singlePressAction = pressTwiceText
-                    onCallControlValueChanged(!flippedValue)
-                }
-            )
-        }
+        SegmentedSelector(
+            options = listOf(true to pressOnceText, false to pressTwiceText),
+            selected = pressOnceIsAction,
+            onSelect = { once ->
+                singlePressAction = if (once) pressOnceText else pressTwiceText
+                onCallControlValueChanged(if (once) flippedValue else !flippedValue)
+            }
+        )
 
         Spacer(modifier = Modifier.height(bottomPadding))
     }

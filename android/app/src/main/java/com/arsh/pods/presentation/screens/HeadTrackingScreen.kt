@@ -22,6 +22,7 @@
 
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.theme.appFontFamily
 import android.graphics.Paint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -72,7 +73,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -110,8 +110,8 @@ fun HeadTrackingScreen(viewModel: AirPodsViewModel) {
 
     val backdrop = rememberLayerBackdrop()    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     var gestureText by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -156,7 +156,7 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontWeight = FontWeight.Bold,
                     color = textColor.copy(alpha = 0.6f),
-                    fontFamily = FontFamily(Font(R.font.sf_pro))
+                    fontFamily = FontFamily.Default
                 ),
                 modifier = Modifier.padding(start = 16.dp, bottom = 8.dp, top = 8.dp)
             )
@@ -192,7 +192,7 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
                 style = TextStyle(
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                     fontWeight = FontWeight.Medium,
-                    fontFamily = FontFamily(Font(R.font.sf_pro)),
+                    fontFamily = FontFamily.Default,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 ),
             )
@@ -224,7 +224,7 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
                         style = TextStyle(
                             fontSize = MaterialTheme.typography.titleLarge.fontSize,
                             fontWeight = FontWeight.Medium,
-                            fontFamily = FontFamily(Font(R.font.sf_pro)),
+                            fontFamily = FontFamily.Default,
                             textAlign = TextAlign.Center
                         ),
                         color = MaterialTheme.colorScheme.onBackground
@@ -235,7 +235,7 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
                         style = TextStyle(
                             fontSize = MaterialTheme.typography.titleLarge.fontSize,
                             fontWeight = FontWeight.Medium,
-                            fontFamily = FontFamily(Font(R.font.sf_pro)),
+                            fontFamily = FontFamily.Default,
                             color = textColor,
                             textAlign = TextAlign.Center
                         ),

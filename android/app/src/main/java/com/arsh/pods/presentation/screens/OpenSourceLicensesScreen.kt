@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.screens
 
+import androidx.compose.foundation.layout.PaddingValues
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -55,15 +56,15 @@ private var debounceJob: Job? = null
 fun OpenSourceLicensesScreen() {
     val backdrop = rememberLayerBackdrop()    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .layerBackdrop(backdrop)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
@@ -77,8 +78,8 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
             libraries = libraries,
             modifier = Modifier
                 .padding(0.dp)
-                .fillMaxSize()
+                .fillMaxSize(),
+            contentPadding = PaddingValues(bottom = bottomPadding)
         )
-        Spacer(modifier = Modifier.height(bottomPadding))
     }
 }

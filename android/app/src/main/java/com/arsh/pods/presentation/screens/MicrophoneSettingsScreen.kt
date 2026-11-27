@@ -1,5 +1,6 @@
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.components.SegmentedSelector
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,8 +34,8 @@ fun MicrophoneSettingsRoute(
 ) {
     val state by viewModel.uiState.collectAsState()    
 
-val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 84.dp
-val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 12.dp
+val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 64.dp
+val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
 
     val id = AACPManager.Companion.ControlCommandIdentifiers.MIC_MODE
 
@@ -69,29 +70,19 @@ fun MicrophoneSettingsScreen(
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .verticalScroll(scrollState)
             .padding(top = 8.dp)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 12.dp)
     ) {
         Spacer(modifier = Modifier.height(topPadding))
 
-        StyledList {
-            StyledListItem(
-                name = stringResource(R.string.microphone_automatic),
-                selected = selectedMode == 0,
-                onClick = { onMicrophoneSettingsChanged(0) }
-            )
-
-            StyledListItem(
-                name = stringResource(R.string.microphone_always_right),
-                selected = selectedMode == 1,
-                onClick = { onMicrophoneSettingsChanged(1) }
-            )
-
-            StyledListItem(
-                name = stringResource(R.string.microphone_always_left),
-                selected = selectedMode == 2,
-                onClick = { onMicrophoneSettingsChanged(2) }
-            )
-        }
+        SegmentedSelector(
+            options = listOf(
+                0 to stringResource(R.string.microphone_automatic),
+                1 to stringResource(R.string.microphone_always_right),
+                2 to stringResource(R.string.microphone_always_left)
+            ),
+            selected = selectedMode,
+            onSelect = onMicrophoneSettingsChanged
+        )
 
         Spacer(modifier = Modifier.height(bottomPadding))
     }
