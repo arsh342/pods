@@ -1,4 +1,11 @@
-# Pods for Android
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="screenshots/icon-dark.png">
+    <img src="screenshots/icon.png" width="128" alt="Pods app icon">
+  </picture>
+</p>
+
+<h1 align="center">Pods</h1>
 
 Pods is an Android companion app for AirPods, with an interface that follows Samsung One UI. On Android 17 or newer it works without root.
 
@@ -110,7 +117,7 @@ For a new Play Store listing, upload the signed `.aab` and enroll in Play App Si
 - `android/app/src/main/res-apple/` — AirPods product pictures.
 - `android/app/src/test/` — unit tests.
 - `android/app/build.gradle.kts` — build variants, version, signing and release tasks.
-- `screenshots/` — images used in this page.
+- `screenshots/` — the icon and screenshots used in this page.
 
 ## License
 
