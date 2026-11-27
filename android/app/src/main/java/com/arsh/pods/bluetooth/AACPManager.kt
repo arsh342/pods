@@ -203,6 +203,9 @@ class AACPManager {
         private set
 
     var customEq: CustomEq = CustomEq(state = 1, low = 50, mid = 50, high = 50)
+
+    // True once the AirPods have sent their equalizer, which only firmware that has one does.
+    var customEqReported = false
         private set
 
     var customEqCallback: ((CustomEq) -> Unit)? = null
@@ -604,6 +607,7 @@ class AACPManager {
             Opcodes.CUSTOM_EQ -> {
                 Log.d(TAG, "Parsing CUSTOM_EQ: ${packet.toHexString()}")
                 customEq = parseCustomEqPacket(packet)
+                customEqReported = true
                 customEqCallback?.invoke(customEq)
                 callback?.onCustomEqReceived(customEq)
             }
@@ -1271,6 +1275,7 @@ class AACPManager {
 
     fun disconnected() {
         Log.d(TAG, "Disconnected, clearing state")
+        customEqReported = false
         controlCommandStatusList.clear()
         controlCommandListeners.clear()
         owns = false

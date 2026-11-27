@@ -1,6 +1,6 @@
 import java.util.Properties
 
-val appVersionName = "1.0.3"
+val appVersionName = "1.0.5"
 
 plugins {
     alias(libs.plugins.android.application)
@@ -48,7 +48,7 @@ android {
     defaultConfig {
         applicationId = "com.arsh.pods"
         targetSdk = 37
-        versionCode = 66
+        versionCode = 67
         versionName = appVersionName
     }
     buildTypes {

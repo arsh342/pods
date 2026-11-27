@@ -18,6 +18,8 @@
 
 package com.arsh.pods.presentation.components
 
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -110,10 +112,11 @@ fun ControlCenterNoiseControlSegmentedButton(
         }
     }
 
+    val haptics = LocalHapticFeedback.current
     val indicatorOffset: Dp by animateDpAsState(
         targetValue = with(density) { targetIndicatorStartPx.toDp() },
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
+            dampingRatio = Spring.DampingRatioNoBouncy,
             stiffness = Spring.StiffnessMedium
         ),
         label = "IndicatorOffset"
@@ -161,7 +164,10 @@ fun ControlCenterNoiseControlSegmentedButton(
                         modifier = Modifier.size(IconAreaSize),
                         mode = mode,
                         isSelected = isSelected,
-                        onClick = { onModeSelected(mode) }
+                        onClick = {
+                            if (!isSelected) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                            onModeSelected(mode)
+                        }
                     )
                 }
             }

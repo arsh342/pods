@@ -18,6 +18,14 @@
 
 package com.arsh.pods.presentation.components
 
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.widthIn
@@ -87,7 +95,7 @@ fun FloatingTabBar(
     val barColor = if (isSystemInDarkTheme()) Color(0xFF252527) else Color(0xFFFFFFFF)
     val contentColor = MaterialTheme.colorScheme.onSurface
 
-    Row(
+    BoxWithConstraints(
         modifier = modifier
             .padding(horizontal = 16.dp)
             .widthIn(max = MaxBarWidth)
@@ -102,6 +110,20 @@ fun FloatingTabBar(
             }
             .padding(4.dp)
     ) {
+        val itemWidth = maxWidth / MainTab.entries.size
+        val highlight by animateDpAsState(
+            targetValue = itemWidth * selected.ordinal,
+            animationSpec = tween(250, easing = FastOutSlowInEasing),
+            label = "tab highlight"
+        )
+        Box(
+            modifier = Modifier
+                .offset(x = highlight)
+                .width(itemWidth)
+                .height(ItemHeight)
+                .background(contentColor.copy(alpha = 0.11f), CircleShape)
+        )
+        Row(modifier = Modifier.fillMaxWidth()) {
         MainTab.entries.forEach { tab ->
             val isSelected = tab == selected
             Column(
@@ -109,7 +131,6 @@ fun FloatingTabBar(
                     .weight(1f)
                     .height(ItemHeight)
                     .clip(CircleShape)
-                    .background(if (isSelected) contentColor.copy(alpha = 0.11f) else Color.Transparent)
                     .selectable(selected = isSelected, role = Role.Tab) { onSelect(tab) },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -132,5 +153,6 @@ fun FloatingTabBar(
                 )
             }
         }
+    }
     }
 }

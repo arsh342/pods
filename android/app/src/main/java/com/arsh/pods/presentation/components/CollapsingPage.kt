@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.components
 
+import com.arsh.pods.presentation.theme.TitleWeight
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.gestures.Orientation
@@ -74,6 +75,7 @@ fun CollapsingPage(
     state: TopAppBarState,
     collapsedTop: Dp,
     showSmallTitle: Boolean,
+    titleWeight: FontWeight = TitleWeight,
     onScrolledChange: (Boolean) -> Unit = {},
     content: @Composable () -> Unit
 ) {
@@ -119,7 +121,7 @@ fun CollapsingPage(
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    fontSize = 36.sp, lineHeight = 44.sp, fontWeight = FontWeight.SemiBold
+                    fontSize = 32.sp, lineHeight = 40.sp, fontWeight = titleWeight
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
@@ -143,7 +145,7 @@ fun CollapsingPage(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Normal),
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

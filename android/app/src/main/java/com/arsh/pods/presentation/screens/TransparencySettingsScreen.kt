@@ -19,6 +19,7 @@
 package com.arsh.pods.presentation.screens
 
 // import com.arsh.pods.utils.RadareOffsetFinder
+import dev.oneuiproject.oneui.R as OneUiR
 import com.arsh.pods.presentation.theme.appFontFamily
 import android.annotation.SuppressLint
 import android.util.Log
@@ -208,8 +209,8 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
                 onValueChange = {
                     amplificationSliderValue.floatValue = it
                 },
-                startIcon = "􀊥",
-                endIcon = "􀊩",
+                startIcon = OneUiR.drawable.ic_oui_volume_down,
+                endIcon = OneUiR.drawable.ic_oui_volume_up,
                 independent = true
             )
 
@@ -259,13 +260,9 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
 
             Text(
                 text = stringResource(R.string.equalizer),
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor.copy(alpha = 0.6f),
-                    fontFamily = FontFamily.Default
-                ),
-                modifier = Modifier.padding(16.dp, bottom = 4.dp)
+                style = MaterialTheme.typography.titleSmall,
+               color = MaterialTheme.colorScheme.onSurfaceVariant,
+               modifier = Modifier.padding(start = 20.dp, bottom = 4.dp)
             )
 
             Column(

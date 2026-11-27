@@ -97,6 +97,7 @@ data class AirPodsUiState(
     val caseSounds: Boolean = true,
 
     val customEq: CustomEq = CustomEq(state = 1, low = 50, mid = 50, high = 50),
+    val customEqReported: Boolean = false,
 
     val connectionSuccessful: Boolean = false,
 )
@@ -249,14 +250,21 @@ class AirPodsViewModel(
 
     private fun observeCustomEq() {
         service.aacpManager.customEqCallback = { eq ->
-            if (!isDemoMode) _uiState.update { it.copy(customEq = eq) }
+            if (!isDemoMode) _uiState.update { it.copy(customEq = eq, customEqReported = true) }
         }
         // The AirPods may have reported their EQ before this view model existed.
-        _uiState.update { it.copy(customEq = service.aacpManager.customEq) }
+        _uiState.update {
+            it.copy(customEq = service.aacpManager.customEq, customEqReported = service.aacpManager.customEqReported)
+        }
     }
 
     fun setCustomEqEnabled(enabled: Boolean) {
         sendCustomEq(_uiState.value.customEq.withEnabled(enabled))
+    }
+
+    /** Turns the custom equalizer on with these bands, as a preset does. */
+    fun applyCustomEq(low: Int, mid: Int, high: Int) {
+        sendCustomEq(_uiState.value.customEq.withBands(low, mid, high).withEnabled(true))
     }
 
     fun setCustomEq(low: Int, mid: Int, high: Int) {

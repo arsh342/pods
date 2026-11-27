@@ -18,6 +18,8 @@
 
 package com.arsh.pods.presentation.components
 
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -61,6 +63,7 @@ fun <T> SegmentedSelector(
     title: String? = null,
     description: String? = null
 ) {
+    val haptics = LocalHapticFeedback.current
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val content = MaterialTheme.colorScheme.onSurface
 
@@ -83,7 +86,7 @@ fun <T> SegmentedSelector(
             val index = options.indexOfFirst { it.first == selected }
             val offset by animateDpAsState(
                 targetValue = itemWidth * index.coerceAtLeast(0),
-                animationSpec = tween(200, easing = FastOutSlowInEasing),
+                animationSpec = tween(250, easing = FastOutSlowInEasing),
                 label = "selector"
             )
             if (index >= 0) {
@@ -105,13 +108,16 @@ fun <T> SegmentedSelector(
                             .fillMaxHeight()
                             .padding(4.dp)
                             .clip(RoundedCornerShape(24.dp))
-                            .selectable(selected = isSelected, role = Role.RadioButton) { onSelect(value) },
+                            .selectable(selected = isSelected, role = Role.RadioButton) {
+                                if (!isSelected) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                                onSelect(value)
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = label,
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 15.sp,
+                                fontSize = 14.sp,
                                 lineHeight = 18.sp,
                                 fontWeight = FontWeight.Normal
                             ),

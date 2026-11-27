@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.screens
 
+import dev.oneuiproject.oneui.R as OneUiR
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -92,8 +93,8 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
             },
             valueRange = 0f..100f,
             snapPoints = listOf(0f, 50f, 100f),
-            startIcon = "􀊥",
-            endIcon = "􀊩",
+            startIcon = OneUiR.drawable.ic_oui_volume_down,
+            endIcon = OneUiR.drawable.ic_oui_volume_up,
             independent = true,
             description = stringResource(R.string.adaptive_audio_description),
                     )

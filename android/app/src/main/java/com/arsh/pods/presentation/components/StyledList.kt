@@ -38,7 +38,7 @@ fun StyledList(
             Text(
                 text = it,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 8.dp)
             )
         }

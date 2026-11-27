@@ -52,7 +52,10 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 fun BatteryView(
     batteryList: List<Battery>,
     budsRes: Int,
-    caseRes: Int
+    caseRes: Int,
+    leftIcon: Int = R.drawable.airpods_pro_left_notification,
+    rightIcon: Int = R.drawable.airpods_pro_right_notification,
+    caseIcon: Int = R.drawable.airpods_pro_case_notification
 ) {
     val left = batteryList.find { it.component == BatteryComponent.LEFT }
     val right = batteryList.find { it.component == BatteryComponent.RIGHT }
@@ -127,7 +130,7 @@ fun BatteryView(
                             BatteryIndicator(
                                 leftLevel,
                                 left.status,
-                                "\uDBC6\uDCE5"
+                                prefixIcon = leftIcon
                             )
                         }
 
@@ -139,7 +142,7 @@ fun BatteryView(
                             BatteryIndicator(
                                 rightLevel,
                                 right.status,
-                                "\uDBC6\uDCE8"
+                                prefixIcon = rightIcon
                             )
                         }
                     }
@@ -163,7 +166,7 @@ fun BatteryView(
                     BatteryIndicator(
                         caseLevel,
                         case?.status ?: BatteryStatus.NOT_CHARGING,
-                        prefix = if (!combineEarbudBatteries) "\uDBC3\uDE6C" else ""
+                        prefixIcon = caseIcon.takeIf { !combineEarbudBatteries }
                     )
                 }
             }

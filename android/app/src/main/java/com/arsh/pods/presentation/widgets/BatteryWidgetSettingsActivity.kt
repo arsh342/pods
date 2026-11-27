@@ -158,7 +158,9 @@ class BatteryWidgetSettingsActivity : ComponentActivity() {
                                 onClick = {
                                     val context = this@BatteryWidgetSettingsActivity
                                     WidgetSettings.save(context, widgetId, appearance)
-                                    BatteryWidgetRenderer.update(context, manager, intArrayOf(widgetId), battery)
+                                    // Battery levels may have arrived since the screen opened.
+                                    ServiceManager.getService()?.updateBatteryWidget()
+                                        ?: BatteryWidgetRenderer.update(context, manager, intArrayOf(widgetId), battery)
                                     setResult(RESULT_OK, result)
                                     finish()
                                 },

@@ -37,6 +37,10 @@ class BatteryWidget : AppWidgetProvider() {
             ?: drawWithoutAirPods(context, appWidgetManager, appWidgetIds)
     }
 
+    override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
+        oldWidgetIds.zip(newWidgetIds).forEach { (old, new) -> WidgetSettings.move(context, old, new) }
+    }
+
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         appWidgetIds.forEach { WidgetSettings.remove(context, it) }
     }

@@ -85,7 +85,7 @@ fun VerticalVolumeSlider(
     val animatedProgress by animateFloatAsState(
         targetValue = dragFraction.coerceIn(0f, 1f),
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
+            dampingRatio = Spring.DampingRatioNoBouncy,
             stiffness = Spring.StiffnessMedium
         ),
         label = "ProgressAnimation"
@@ -94,7 +94,7 @@ fun VerticalVolumeSlider(
     val animatedOverscroll by animateFloatAsState(
         targetValue = overscrollAmount,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
+            dampingRatio = Spring.DampingRatioNoBouncy,
             stiffness = Spring.StiffnessMediumLow
         ),
         label = "OverscrollAnimation"

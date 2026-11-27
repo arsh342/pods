@@ -1,5 +1,13 @@
 package com.arsh.pods.presentation.navigation
 
+import com.arsh.pods.presentation.theme.HomeTitleWeight
+import com.arsh.pods.presentation.theme.TitleWeight
+import dev.oneuiproject.oneui.R as OneUiR
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.mutableStateMapOf
 import com.arsh.pods.presentation.components.OneUiPageTop
 import com.arsh.pods.presentation.components.CollapsingPage
@@ -67,7 +75,6 @@ fun NavigationRoot(
         Screen.HearingProtection -> stringResource(R.string.hearing_protection)
         is Screen.LongPress -> screen.bud
         Screen.OpenSourceLicenses -> stringResource(R.string.open_source_licenses)
-        Screen.Rename -> stringResource(R.string.name)
         Screen.TransparencyCustomization -> stringResource(R.string.customize_transparency_mode)
         Screen.UpdateHearingTest -> stringResource(R.string.update_hearing_test)
         Screen.VersionInfo -> stringResource(R.string.version)
@@ -89,7 +96,7 @@ fun NavigationRoot(
                             Log.d("HeadTrackingScreen", "Head tracking stopped")
                         }
                     },
-                    icon = if (state.headTrackingActive) "􀊅" else "􀊃",
+                    icon = if (state.headTrackingActive) OneUiR.drawable.ic_oui_control_pause else OneUiR.drawable.ic_oui_control_play,
                     backdrop = scaffoldBackdrop
                 )
             }
@@ -140,13 +147,28 @@ fun NavigationRoot(
                     )
                     // Without AirPods the first page is a centred message with no header.
                     !state.isLocallyConnected -> content()
-                    else -> CollapsingPage(
-                        title = if (tab == MainTab.HOME) state.deviceName else tab.title(),
-                        state = tabHeaders.getValue(tab),
-                        collapsedTop = statusBar + OneUiPageTop,
-                        showSmallTitle = false,
-                        content = content
-                    )
+                    else -> {
+                        // The new tab fades in rather than appearing all at once.
+                        val fade = remember { Animatable(1f) }
+                        var shownTab by remember { mutableStateOf(tab) }
+                        LaunchedEffect(tab) {
+                            if (tab != shownTab) {
+                                shownTab = tab
+                                fade.snapTo(0f)
+                                fade.animateTo(1f, tween(200, easing = LinearOutSlowInEasing))
+                            }
+                        }
+                        Box(Modifier.graphicsLayer { alpha = fade.value }) {
+                            CollapsingPage(
+                                title = if (tab == MainTab.HOME) state.deviceName else tab.title(),
+                                state = tabHeaders.getValue(tab),
+                                collapsedTop = statusBar + OneUiPageTop,
+                                showSmallTitle = false,
+                                titleWeight = if (tab == MainTab.HOME) HomeTitleWeight else TitleWeight,
+                                content = content
+                            )
+                        }
+                    }
                 }
             }
         )

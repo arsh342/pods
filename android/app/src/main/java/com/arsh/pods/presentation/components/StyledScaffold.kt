@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.components
 
+import dev.oneuiproject.oneui.R as OneUiR
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -91,7 +92,7 @@ fun StyledScaffold(
                 if (showBackButton) {
                     StyledIconButton(
                         onClick = onNavigateBack,
-                        icon = "􀯶",
+                        icon = OneUiR.drawable.ic_oui_back,
                         backdrop = backdrop,
                         raised = contentScrolled
                     )

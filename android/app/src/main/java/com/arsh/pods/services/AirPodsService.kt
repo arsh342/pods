@@ -711,11 +711,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 if (intent?.action == "com.arsh.pods.cross_device_island") {
                     showIsland(
                         this@AirPodsService,
-                        batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.LEFT }?.level!!.coerceAtMost(
-                                batteryNotification.getBattery()
-                                    .find { it.component == BatteryComponent.RIGHT }?.level!!
-                            )
+                        islandBatteryLevel()
                     )
                 } else if (intent?.action == AirPodsNotifications.DISCONNECT_RECEIVERS) {
                     try {
@@ -896,10 +892,12 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     )
                 }
 
-                if (batteryNotification.getBattery()[0].status == BatteryStatus.CHARGING && batteryNotification.getBattery()[1].status == BatteryStatus.CHARGING) {
-                    disconnectAudio(this@AirPodsService, device)
-                } else {
-                    connectAudio(this@AirPodsService, device)
+                val bothCharging = batteryNotification.getBattery()[0].status == BatteryStatus.CHARGING &&
+                    batteryNotification.getBattery()[1].status == BatteryStatus.CHARGING
+                if (bothCharging != lastBothCharging) {
+                    lastBothCharging = bothCharging
+                    if (bothCharging) disconnectAudio(this@AirPodsService, device)
+                    else connectAudio(this@AirPodsService, device)
                 }
             }
 
@@ -989,12 +987,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     disconnectAudio(this@AirPodsService, device)
                     showIsland(
                         this@AirPodsService,
-                        (batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.LEFT }?.level
-                            ?: 0).coerceAtMost(
-                            batteryNotification.getBattery()
-                                .find { it.component == BatteryComponent.RIGHT }?.level ?: 0
-                        ),
+                        islandBatteryLevel(),
                         IslandType.MOVED_TO_OTHER_DEVICE,
                         reversed = true,
                         otherDeviceName = senderName
@@ -1003,12 +996,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 if (!aacpManager.owns) {
                     showIsland(
                         this@AirPodsService,
-                        (batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.LEFT }?.level
-                            ?: 0).coerceAtMost(
-                            batteryNotification.getBattery()
-                                .find { it.component == BatteryComponent.RIGHT }?.level ?: 0
-                        ),
+                        islandBatteryLevel(),
                         IslandType.MOVED_TO_OTHER_DEVICE,
                         reversed = reasonReverseTapped,
                         otherDeviceName = senderName
@@ -1022,11 +1010,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                     aacpManager.connectedDevices.find { it.mac == sender }?.type ?: "Other device"
                 showIsland(
                     this@AirPodsService,
-                    (batteryNotification.getBattery()
-                        .find { it.component == BatteryComponent.LEFT }?.level ?: 0).coerceAtMost(
-                        batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.RIGHT }?.level ?: 0
-                    ),
+                    islandBatteryLevel(),
                     IslandType.MOVED_TO_OTHER_DEVICE,
                     reversed = false,
                     otherDeviceName = senderName
@@ -1097,10 +1081,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
             override fun onProximityKeysReceived(proximityKeys: ByteArray) {
                 val keys = aacpManager.parseProximityKeysResponse(proximityKeys)
-                Log.d("AirPodsParser", "Proximity keys: $keys")
                 sharedPreferences.edit {
                     for (key in keys) {
-                        Log.d("AirPodsParser", "Proximity key: ${key.key.name} = ${key.value}")
+                        Log.d("AirPodsParser", "Proximity key received: ${key.key.name}")
                         putString(key.key.name, Base64.encode(key.value))
                     }
                 }
@@ -1267,11 +1250,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             ) {
                 showIsland(
                     this@AirPodsService,
-                    (batteryNotification.getBattery()
-                        .find { it.component == BatteryComponent.LEFT }?.level ?: 0).coerceAtMost(
-                        batteryNotification.getBattery()
-                            .find { it.component == BatteryComponent.RIGHT }?.level ?: 0
-                    )
+                    islandBatteryLevel()
                 )
             }
 
@@ -1667,6 +1646,15 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
 
     @SuppressLint("MissingPermission")
+    /** The level the island shows: the headset's for AirPods Max, otherwise the lower earbud. */
+    private fun islandBatteryLevel(): Int {
+        val battery = batteryNotification.getBattery()
+        battery.find { it.component == BatteryComponent.HEADSET }?.let { return it.level }
+        val left = battery.find { it.component == BatteryComponent.LEFT }?.level ?: 0
+        val right = battery.find { it.component == BatteryComponent.RIGHT }?.level ?: 0
+        return left.coerceAtMost(right)
+    }
+
     fun showIsland(
         service: Service,
         batteryPercentage: Int,
@@ -1689,6 +1677,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
     private lateinit var earReceiver: BroadcastReceiver
     var widgetMobileBatteryEnabled = false
+
+    // Whether both earbuds were last seen charging, so audio is only changed when that changes.
+    private var lastBothCharging: Boolean? = null
 
     object BatteryChangedIntentReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -1826,7 +1817,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     fun setBatteryMetadata() {
-        if (checkSelfPermission("android.permission.BLUETOOTH_PRIVILEGED") != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission("android.permission.BLUETOOTH_PRIVILEGED") != PackageManager.PERMISSION_GRANTED) return
+        if (batteryNotification.getBattery().any { it.component == BatteryComponent.HEADSET }) return
+        run {
             device?.let { it ->
                 SystemApisUtils.setMetadata(
                     it,
@@ -2094,8 +2087,9 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         val leftBattery = batteryList.find { it.component == BatteryComponent.LEFT }
         val rightBattery = batteryList.find { it.component == BatteryComponent.RIGHT }
 
-        // Calculate unified battery level (minimum of left and right)
-        val batteryUnified = minOf(
+        val headset = batteryList.find { it.component == BatteryComponent.HEADSET }
+        // AirPods Max report one battery; for earbuds Android shows the lower of the two.
+        val batteryUnified = headset?.level ?: minOf(
             leftBattery?.level ?: 100, rightBattery?.level ?: 100
         )
 
@@ -2172,6 +2166,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     private fun setMetadatas(d: BluetoothDevice) {
+        if (airpodsInstance?.model?.isHeadphones == true) return
         if (checkSelfPermission("android.permission.BLUETOOTH_PRIVILEGED") != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "no permission BLUETOOTH_PRIVILEGED, returning")
             return
@@ -2357,11 +2352,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
                 connectAudio(this, device)
                 showIsland(
                     this,
-                    batteryNotification.getBattery()
-                        .find { it.component == BatteryComponent.LEFT }?.level!!.coerceAtMost(
-                            batteryNotification.getBattery()
-                                .find { it.component == BatteryComponent.RIGHT }?.level!!
-                        ),
+                    islandBatteryLevel(),
                     IslandType.CONNECTED
                 )
 
@@ -2468,11 +2459,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
         showIsland(
             this,
-            batteryNotification.getBattery()
-                .find { it.component == BatteryComponent.LEFT }?.level!!.coerceAtMost(
-                    batteryNotification.getBattery()
-                        .find { it.component == BatteryComponent.RIGHT }?.level!!
-                ),
+            islandBatteryLevel(),
             IslandType.TAKING_OVER
         )
 
@@ -2694,11 +2681,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         Log.d(TAG, "Disconnected from AirPods, showing island.")
         showIsland(
             this,
-            batteryNotification.getBattery()
-                .find { it.component == BatteryComponent.LEFT }?.level!!.coerceAtMost(
-                    batteryNotification.getBattery()
-                        .find { it.component == BatteryComponent.RIGHT }?.level!!
-                ),
+            islandBatteryLevel(),
             IslandType.MOVED_TO_REMOTE
         )
         val bluetoothAdapter = getSystemService(BluetoothManager::class.java).adapter
@@ -2933,6 +2916,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
 
     @SuppressLint("MissingPermission")
     override fun onDestroy() {
+        LowBatteryNotification.remove(this)
         clearPacketLogs()
         Log.d(TAG, "Service stopped is being destroyed for some reason!")
 

@@ -49,6 +49,13 @@ object WidgetSettings {
         }
     }
 
+    fun move(context: Context, from: Int, to: Int) {
+        val stored = preferences(context)
+        if (!stored.contains("theme_$from")) return
+        save(context, to, load(context, from))
+        remove(context, from)
+    }
+
     fun remove(context: Context, widgetId: Int) {
         preferences(context).edit {
             remove("theme_$widgetId")

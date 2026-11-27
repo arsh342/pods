@@ -18,6 +18,9 @@
 
 package com.arsh.pods.presentation.components
 
+import dev.oneuiproject.oneui.R as OneUiR
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.Icon
 import androidx.compose.animation.core.animateFloatAsState
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -102,7 +105,7 @@ import kotlin.math.tanh
 @Composable
 fun StyledIconButton(
     modifier: Modifier = Modifier,
-    icon: String,
+    icon: Int,
     iconTint: Color = Color.Unspecified,
     surfaceColor: Color = Color.Unspecified,
     backdrop: LayerBackdrop = rememberLayerBackdrop(),
@@ -121,13 +124,7 @@ fun StyledIconButton(
                         enabled = enabled,
                         modifier = Modifier.size(52.dp)
                     ) {
-                        Text(
-                            text = icon,
-                            style = TextStyle(
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
-                            )
-                        )
+                        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(24.dp))
                     }
                 }
                 MaterialButtonStyle.Filled -> {
@@ -136,13 +133,7 @@ fun StyledIconButton(
                         enabled = enabled,
                         modifier = Modifier.size(52.dp)
                     ) {
-                        Text(
-                            text = icon,
-                            style = TextStyle(
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
-                            )
-                        )
+                        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(24.dp))
                     }
                 }
                 MaterialButtonStyle.Outlined -> {
@@ -151,13 +142,7 @@ fun StyledIconButton(
                         enabled = enabled,
                         modifier = Modifier.size(52.dp)
                     ) {
-                        Text(
-                            text = icon,
-                            style = TextStyle(
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
-                            )
-                        )
+                        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(24.dp))
                     }
                 }
                 MaterialButtonStyle.Normal -> {
@@ -166,19 +151,12 @@ fun StyledIconButton(
                         enabled = enabled,
                         modifier = Modifier.size(52.dp)
                     ) {
-                        Text(
-                            text = icon,
-                            style = TextStyle(
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                fontFamily = FontFamily(Font(R.font.sf_pro))
-                            )
-                        )
+                        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(24.dp))
                     }
                 }
             }
         }
         DesignSystem.Apple -> {
-            val haptics = LocalHapticFeedback.current
             val isDarkTheme = isSystemInDarkTheme()
             val backgroundColor = if (surfaceColor.isSpecified) {
                 surfaceColor
@@ -201,20 +179,10 @@ fun StyledIconButton(
                     .size(48.dp)
                     .clip(androidx.compose.foundation.shape.CircleShape)
                     .background(backgroundColor.copy(alpha = backgroundColor.alpha * circle))
-                    .clickable(enabled = enabled, role = Role.Button) {
-                        haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        onClick()
-                    },
+                    .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = icon,
-                    color = foregroundColor,
-                    style = TextStyle(
-                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                        fontFamily = FontFamily(Font(R.font.sf_pro))
-                    )
-                )
+                Icon(painterResource(icon), contentDescription = null, tint = foregroundColor, modifier = Modifier.size(24.dp))
             }
         }
     }
@@ -232,7 +200,7 @@ fun StyledIconButtonPreview() {
             RoundedCornerShape(28.dp)
         ), contentAlignment = Alignment.Center) {
         StyledIconButton(
-            icon = "􀍟",
+            icon = OneUiR.drawable.ic_oui_back,
             onClick = { }
         )
     }

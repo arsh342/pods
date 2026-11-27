@@ -18,6 +18,7 @@
 
 package com.arsh.pods.presentation.screens
 
+import dev.oneuiproject.oneui.R as OneUiR
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
@@ -161,8 +162,8 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
             onValueChange = {
                 amplificationSliderValue.floatValue = it
             },
-            startIcon = "􀊥",
-            endIcon = "􀊩",
+            startIcon = OneUiR.drawable.ic_oui_volume_down,
+            endIcon = OneUiR.drawable.ic_oui_volume_up,
             independent = true,
         )
 

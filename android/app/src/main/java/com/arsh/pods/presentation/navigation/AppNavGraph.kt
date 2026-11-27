@@ -31,7 +31,6 @@ import com.arsh.pods.presentation.screens.LongPress
 import com.arsh.pods.presentation.screens.EqualizerScreen
 import com.arsh.pods.presentation.screens.MicrophoneSettingsRoute
 import com.arsh.pods.presentation.screens.OpenSourceLicensesScreen
-import com.arsh.pods.presentation.screens.RenameScreen
 import com.arsh.pods.presentation.screens.TransparencySettingsScreen
 import com.arsh.pods.presentation.screens.UpdateHearingTestRoute
 import com.arsh.pods.presentation.screens.VersionScreen
@@ -73,7 +72,7 @@ fun AppNavGraph(
                                 tab = tab,
                                 scrollState = scrollState(tab),
                                 navigateToAppSettings = { navigate(Screen.AppSettings) },
-                                navigateToRename = { navigate(Screen.Rename) },
+                                onRename = airPodsViewModel::setName,
                                 navigateToHearingProtection = { navigate(Screen.HearingProtection) },
                                 navigateToHearingAid = { navigate(Screen.HearingAid) },
                                 navigateToLeftLongPress = {
@@ -94,12 +93,6 @@ fun AppNavGraph(
                                 navigateToMicrophoneSettings = { navigate(Screen.MicrophoneSettings) },
                                 navigateToEqualizer = { navigate(Screen.Equalizer) },
                             )
-                        }
-
-                    Screen.Rename ->
-                        page(screen) {
-                            if (!airPodsViewModel.isReady) LoadingScreen()
-                            RenameScreen(airPodsViewModel)
                         }
 
                     Screen.AppSettings ->

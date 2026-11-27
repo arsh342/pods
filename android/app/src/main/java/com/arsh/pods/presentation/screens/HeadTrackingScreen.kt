@@ -152,13 +152,9 @@ val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBotto
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 "Velocity",
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor.copy(alpha = 0.6f),
-                    fontFamily = FontFamily.Default
-                ),
-                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp, top = 8.dp)
+                style = MaterialTheme.typography.titleSmall,
+               color = MaterialTheme.colorScheme.onSurfaceVariant,
+               modifier = Modifier.padding(start = 20.dp, bottom = 8.dp, top = 8.dp)
             )
             Plot()
 

@@ -32,10 +32,16 @@ import androidx.compose.ui.unit.sp
 // One UI Sans is installed on Galaxy phones under the family name "sec". Apps get Roboto unless
 // they ask for it by name; other phones do not have it and keep their own font.
 @OptIn(ExperimentalTextApi::class)
+/** Page titles, between medium and semibold. */
+val TitleWeight = FontWeight(575)
+
+/** The AirPods name on Home, a little heavier than other titles. */
+val HomeTitleWeight = FontWeight(625)
+
 val appFontFamily: FontFamily =
     if (Typeface.create("sec", Typeface.NORMAL) == Typeface.DEFAULT) FontFamily.Default
     else FontFamily(
-        listOf(400, 500, 600, 700).map {
+        listOf(400, 500, 575, 600, 625, 700).map {
             Font(
                 familyName = DeviceFontFamilyName("sec"),
                 weight = FontWeight(it),
@@ -109,25 +115,25 @@ val OneUITypography = Typography(
     ),
     titleSmall = TextStyle(
         fontFamily = appFontFamily,
-        fontWeight = FontWeight(600),
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.1.sp
+        fontWeight = FontWeight(500),
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = 0.sp
     ),
 
     // Body styles - Main content
     bodyLarge = TextStyle(
         fontFamily = appFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
+        fontSize = 17.sp,
+        lineHeight = 23.sp,
         letterSpacing = 0.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = appFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
         letterSpacing = 0.sp
     ),
     bodySmall = TextStyle(
@@ -220,10 +226,10 @@ val OneUITypography = Typography(
     ),
     titleSmallEmphasized = TextStyle(
         fontFamily = appFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.1.sp
+        fontWeight = FontWeight(500),
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = 0.sp
     ),
     bodyLargeEmphasized = TextStyle(
         fontFamily = appFontFamily,

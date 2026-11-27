@@ -20,6 +20,8 @@
 
 package com.arsh.pods
 
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import com.arsh.pods.data.AirPodsModels
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -217,7 +219,7 @@ fun DraggableDismissBox(
         if (!isDragging) {
             if (abs(dragOffset) < dismissThreshold) {
                 val springSpec = spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    dampingRatio = Spring.DampingRatioNoBouncy,
                     stiffness = Spring.StiffnessHigh,
                     visibilityThreshold = 0.1f
                 )
@@ -325,12 +327,13 @@ fun NewControlCenterDialogContent(
     }
 
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    val haptics = LocalHapticFeedback.current
     val maxVolume = remember { audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) }
     var currentVolumeInt by remember { mutableIntStateOf(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)) }
     val animatedVolumeFraction by animateFloatAsState(
         targetValue = currentVolumeInt.toFloat() / maxVolume.toFloat(),
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
+            dampingRatio = Spring.DampingRatioNoBouncy,
             stiffness = Spring.StiffnessMediumLow
         ),
         label = "VolumeAnimation"
@@ -449,6 +452,7 @@ fun NewControlCenterDialogContent(
                     displayFraction = animatedVolumeFraction,
                     maxVolume = maxVolume,
                     onVolumeChange = { newVolume ->
+                        if (newVolume != currentVolumeInt) haptics.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                         currentVolumeInt = newVolume
                         try {
                             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, 0)
@@ -479,7 +483,7 @@ fun NewControlCenterDialogContent(
                     .padding(bottom = 72.dp)
                     .animateContentSize(
                         animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            dampingRatio = Spring.DampingRatioNoBouncy,
                             stiffness = Spring.StiffnessMedium
                         )
                     ),

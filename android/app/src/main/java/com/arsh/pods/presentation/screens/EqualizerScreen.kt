@@ -18,6 +18,22 @@
 
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.components.StyledButton
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
+import com.arsh.pods.presentation.components.EqualizerGraph
+import com.arsh.pods.data.EqPreset
+import com.arsh.pods.data.CustomEq
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import com.arsh.pods.presentation.components.SegmentedSelector
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -84,6 +100,7 @@ fun EqualizerScreen(viewModel: AirPodsViewModel) {
     }
 
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
     var sendJob by remember { mutableStateOf<Job?>(null) }
     fun sendBands() {
         sendJob?.cancel()
@@ -108,56 +125,107 @@ fun EqualizerScreen(viewModel: AirPodsViewModel) {
         Spacer(modifier = Modifier.height(topPadding))
 
         if (Capability.CUSTOM_EQ in state.capabilities) {
+            val shown = CustomEq(eq.state, low.floatValue.roundToInt(), mid.floatValue.roundToInt(), high.floatValue.roundToInt())
+            val preset = EqPreset.matching(shown).takeIf { eq.isEnabled() }
+            // Recommended lists the presets; Custom is for a hand-made setting.
+            var showCustom by rememberSaveable { mutableStateOf(eq.isEnabled() && preset == null) }
+            LaunchedEffect(eq) { if (eq.isEnabled() && EqPreset.matching(eq) == null) showCustom = true }
+
             SegmentedSelector(
                 title = stringResource(R.string.airpods_equalizer),
                 options = listOf(
                     false to stringResource(R.string.recommended),
                     true to stringResource(R.string.custom)
                 ),
-                selected = eq.isEnabled(),
-                onSelect = { viewModel.setCustomEqEnabled(it) }
+                selected = showCustom,
+                onSelect = { custom ->
+                    showCustom = custom
+                    // The graph only works once the custom equalizer is on.
+                    if (custom && !eq.isEnabled()) viewModel.setCustomEqEnabled(true)
+                }
             )
 
-            if (eq.isEnabled()) {
-                listOf(
-                    R.string.eq_low to low,
-                    R.string.eq_mid to mid,
-                    R.string.eq_high to high
-                ).forEach { (label, band) ->
-                    StyledSlider(
-                        label = stringResource(label),
-                        value = band.floatValue,
-                        onValueChange = {
-                            band.floatValue = it
-                            sendBands()
-                        },
-                        valueRange = 0f..100f,
-                        snapPoints = listOf(50f),
-                        startLabel = "−",
-                        endLabel = "+",
-                        independent = true
-                    )
+            if (!showCustom) {
+                // The AirPods' own tuning first, then the presets, two to a row.
+                val choices: List<EqPreset?> = listOf(null) + EqPreset.entries
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    choices.chunked(2).forEach { pair ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            pair.forEach { choice ->
+                                val selected = if (choice == null) !eq.isEnabled() else choice == preset
+                                Text(
+                                    text = stringResource(choice?.label ?: R.string.eq_preset_default),
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                                    color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (selected) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.surface
+                                        )
+                                        .selectable(selected = selected, role = Role.RadioButton) {
+                                            if (!selected) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                                            if (choice == null) {
+                                                viewModel.setCustomEqEnabled(false)
+                                            } else {
+                                                low.floatValue = choice.low.toFloat()
+                                                mid.floatValue = choice.mid.toFloat()
+                                                high.floatValue = choice.high.toFloat()
+                                                viewModel.applyCustomEq(choice.low, choice.mid, choice.high)
+                                            }
+                                        }
+                                        .padding(vertical = 14.dp)
+                                )
+                            }
+                        }
+                    }
                 }
-
-                StyledList {
-                    StyledListItem(
-                        name = stringResource(R.string.reset),
-                        onClick = {
-                            low.floatValue = 50f
-                            mid.floatValue = 50f
-                            high.floatValue = 50f
+            } else {
+                val bands = listOf(low, mid, high)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(28.dp))
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                ) {
+                    EqualizerGraph(
+                        values = bands.map { it.floatValue.roundToInt() },
+                        labels = listOf(
+                            stringResource(R.string.eq_low),
+                            stringResource(R.string.eq_mid),
+                            stringResource(R.string.eq_high)
+                        ),
+                        onChange = { band, value ->
+                            bands[band].floatValue = value.toFloat()
                             sendBands()
                         }
                     )
                 }
+                StyledButton(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                        low.floatValue = 50f
+                        mid.floatValue = 50f
+                        high.floatValue = 50f
+                        sendBands()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.reset))
+                }
             }
 
-            Text(
-                text = stringResource(R.string.airpods_equalizer_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
+            if (!state.customEqReported) {
+                Text(
+                    text = stringResource(R.string.airpods_equalizer_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+            }
         }
 
         StyledList(title = stringResource(R.string.phone_sound)) {

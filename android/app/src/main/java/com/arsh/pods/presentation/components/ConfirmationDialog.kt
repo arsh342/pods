@@ -18,11 +18,13 @@
 
 package com.arsh.pods.presentation.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,8 +76,8 @@ fun ConfirmationDialog(
 ) {
     AnimatedVisibility(
         visible = showDialog.value,
-        enter = scaleIn(initialScale = 1.05f) + fadeIn(),
-        exit = scaleOut(targetScale = 1.05f) + fadeOut()
+        enter = fadeIn(tween(200)),
+        exit = fadeOut(tween(150))
     ) {
         when (LocalDesignSystem.current) {
             DesignSystem.OneUI -> {
@@ -134,6 +136,10 @@ fun ConfirmationDialog(
                     ) {
                         Box(
                             modifier = Modifier
+                                .animateEnterExit(
+                                    enter = slideInVertically(tween(300, easing = FastOutSlowInEasing)) { it / 2 },
+                                    exit = slideOutVertically(tween(200)) { it / 2 }
+                                )
                                 .navigationBarsPadding()
                                 .padding(12.dp)
                                 .widthIn(max = 420.dp)

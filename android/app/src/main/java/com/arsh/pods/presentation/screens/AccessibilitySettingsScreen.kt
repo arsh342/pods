@@ -19,6 +19,7 @@
 package com.arsh.pods.presentation.screens
 
 // import com.arsh.pods.utils.RadareOffsetFinder
+import dev.oneuiproject.oneui.R as OneUiR
 import com.arsh.pods.utils.userChanges
 import com.arsh.pods.presentation.components.SegmentedSelector
 import android.annotation.SuppressLint
@@ -245,8 +246,8 @@ fun AccessibilitySettingsScreen(viewModel: AirPodsViewModel, navigateToTranspare
             },
             valueRange = 0f..100f,
             snapPoints = listOf(75f),
-            startIcon = "\uDBC0\uDEA1",
-            endIcon = "\uDBC0\uDEA9",
+            startIcon = OneUiR.drawable.ic_oui_volume_down,
+            endIcon = OneUiR.drawable.ic_oui_volume_up,
             independent = true,
                     )
 

@@ -18,6 +18,11 @@
 
 package com.arsh.pods.presentation.components
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.Icon
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -70,8 +75,8 @@ fun StyledSlider(
     valueRange: ClosedFloatingPointRange<Float>,
     snapPoints: List<Float> = emptyList(),
     snapThreshold: Float = 0.05f,
-    startIcon: String? = null,
-    endIcon: String? = null,
+    startIcon: Int? = null,
+    endIcon: Int? = null,
     startLabel: String? = null,
     endLabel: String? = null,
     independent: Boolean = false,
@@ -81,8 +86,6 @@ fun StyledSlider(
     count: Int = 1
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    // Icons are SF Symbols characters, which only the bundled font can draw.
-    val glyphs = FontFamily(Font(R.font.sf_pro))
 
     val control = @Composable {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -99,7 +102,7 @@ fun StyledSlider(
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 startIcon?.let {
-                    Text(it, fontFamily = glyphs, color = muted, modifier = Modifier.padding(end = 12.dp))
+                    Icon(painterResource(it), null, tint = muted, modifier = Modifier.padding(end = 12.dp).size(22.dp))
                 }
                 SliderTrack(
                     modifier = Modifier.weight(1f),
@@ -111,7 +114,7 @@ fun StyledSlider(
                     onValueChange = onValueChange
                 )
                 endIcon?.let {
-                    Text(it, fontFamily = glyphs, color = muted, modifier = Modifier.padding(start = 12.dp))
+                    Icon(painterResource(it), null, tint = muted, modifier = Modifier.padding(start = 12.dp).size(22.dp))
                 }
             }
         }
@@ -126,7 +129,7 @@ fun StyledSlider(
         label?.let {
             Text(
                 text = it,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleSmall,
                 color = muted,
                 modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
             )
@@ -168,13 +171,22 @@ private fun SliderTrack(
     val inactive = if (isSystemInDarkTheme()) Color(0xFF848487) else Color(0xFFD8D8DC)
     val active = if (enabled) MaterialTheme.colorScheme.primary else inactive
 
+    val haptics = LocalHapticFeedback.current
+    var lastValue by remember { mutableFloatStateOf(value) }
+
     // Maps a touch position to a value, keeping the thumb inside the track.
     fun select(x: Float, radius: Float) {
         val usable = width - radius * 2
         if (usable <= 0f) return
         val raw = valueRange.start + ((x - radius) / usable).coerceIn(0f, 1f) * span
         val snap = currentSnapPoints.minByOrNull { abs(it - raw) }
-        currentOnValueChange(if (snap != null && abs(snap - raw) <= snapThreshold) snap else raw)
+        // snapThreshold is a share of the whole range.
+        val chosen = if (snap != null && abs(snap - raw) <= snapThreshold * span) snap else raw
+        // A tick as the thumb settles on a marked value or reaches an end, like One UI sliders.
+        val landmarks = currentSnapPoints + valueRange.start + valueRange.endInclusive
+        if (chosen != lastValue && chosen in landmarks) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+        lastValue = chosen
+        currentOnValueChange(chosen)
     }
 
     var radiusPx by remember { mutableFloatStateOf(0f) }

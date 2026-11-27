@@ -20,6 +20,8 @@
 
 package com.arsh.pods.presentation.components
 
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -190,6 +192,7 @@ fun NoiseControlSettings(
             val selectedBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
 
             val noiseControlMode = remember { mutableStateOf(NoiseControlMode.OFF) }
+            val haptics = LocalHapticFeedback.current
 
             fun onModeSelected(mode: NoiseControlMode, received: Boolean = false) {
                 val previousMode = noiseControlMode.value
@@ -202,7 +205,10 @@ fun NoiseControlSettings(
 
                 noiseControlMode.value = targetMode
 
-                if (!received && targetMode != previousMode) onNoiseControlModeChanged(targetMode.ordinal + 1)
+                if (!received && targetMode != previousMode) {
+                    haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                    onNoiseControlModeChanged(targetMode.ordinal + 1)
+                }
             }
 
             LaunchedEffect(noiseControlModeValue, showOffListeningMode) {
@@ -247,7 +253,7 @@ fun NoiseControlSettings(
                 }
 
                 // One UI selectors slide without bouncing.
-                val animationSpec: AnimationSpec<Float> = tween(200, easing = FastOutSlowInEasing)
+                val animationSpec: AnimationSpec<Float> = tween(250, easing = FastOutSlowInEasing)
 
                 val targetOffset = buttonWidth * when(noiseControlMode.value) {
                     NoiseControlMode.OFF -> if (showOffListeningMode) 0 else 1

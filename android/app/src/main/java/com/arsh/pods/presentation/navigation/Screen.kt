@@ -9,9 +9,6 @@ sealed interface Screen: NavKey {
     data object AirPodsSettings: Screen
 
     @Serializable
-    data object Rename: Screen
-
-    @Serializable
     data object AppSettings: Screen
 
     @Serializable

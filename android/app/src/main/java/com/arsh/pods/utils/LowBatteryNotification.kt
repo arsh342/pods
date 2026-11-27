@@ -41,13 +41,19 @@ object LowBatteryNotification {
     private const val ID = 500
     private const val RED = 0xFFFC4244.toInt()
 
+    // The separate alerts used before the live update, one per part.
+    private val OLD_IDS = listOf(502, 504, 508)
+
     fun remove(context: Context) {
-        context.getSystemService(NotificationManager::class.java).cancel(ID)
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager.cancel(ID)
+        OLD_IDS.forEach(manager::cancel)
     }
 
     /** [parts] is what is low now; [newThreshold] is true when one has just reached the next step down. */
     fun refresh(context: Context, channel: String, parts: List<Battery>, newThreshold: Boolean) {
         val preferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+        context.getSystemService(NotificationManager::class.java).let { manager -> OLD_IDS.forEach(manager::cancel) }
         val action = liveAction(parts.isNotEmpty(), newThreshold, preferences.getBoolean(DISMISSED, false))
         when (action) {
             LiveAction.REMOVE -> remove(context)

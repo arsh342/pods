@@ -20,6 +20,7 @@
 
 package com.arsh.pods.presentation.screens
 
+import com.arsh.pods.presentation.components.EditableListRow
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Button
 import androidx.compose.foundation.rememberScrollState
@@ -129,7 +130,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun AirPodsSettingsRoute(
     viewModel: AirPodsViewModel,
-    navigateToRename: () -> Unit,
+    onRename: (String) -> Unit,
     navigateToHearingProtection: () -> Unit,
     navigateToHearingAid: () -> Unit,
     navigateToLeftLongPress: () -> Unit,
@@ -176,7 +177,7 @@ fun AirPodsSettingsRoute(
             setOffListeningMode = viewModel::setOffListeningMode,
             disconnect = viewModel::disconnect,
 
-            navigateToRename = navigateToRename,
+            onRename = onRename,
             navigateToHearingProtection = navigateToHearingProtection,
             navigateToHearingAid = navigateToHearingAid,
             navigateToLeftLongPress = navigateToLeftLongPress,
@@ -219,7 +220,7 @@ fun AirPodsSettingsScreen(
         setOffListeningMode: (Boolean) -> Unit,
         disconnect: () -> Unit,
 
-        navigateToRename: () -> Unit,
+        onRename: (String) -> Unit,
         navigateToHearingProtection: () -> Unit,
         navigateToHearingAid: () -> Unit,
         navigateToLeftLongPress: () -> Unit,
@@ -276,7 +277,10 @@ fun AirPodsSettingsScreen(
                 BatteryView(
                     batteryList = state.battery,
                     budsRes = state.instance?.model?.budsRes ?: R.drawable.airpods_pro_2_buds,
-                    caseRes = state.instance?.model?.caseRes ?: R.drawable.airpods_pro_2_case
+                    caseRes = state.instance?.model?.caseRes ?: R.drawable.airpods_pro_2_case,
+                    leftIcon = state.instance?.model?.leftIconRes ?: R.drawable.airpods_pro_left_notification,
+                    rightIcon = state.instance?.model?.rightIconRes ?: R.drawable.airpods_pro_right_notification,
+                    caseIcon = state.instance?.model?.caseIconRes ?: R.drawable.airpods_pro_case_notification
                 )
             }
 
@@ -379,11 +383,13 @@ fun AirPodsSettingsScreen(
 
             if (shown(MainSetting.NAME)) Column {
                 StyledList {
-                    StyledListItem(
-                        name = stringResource(R.string.name),
-                        description = deviceName.text,
-                        onClick = navigateToRename
-                    )
+                    item { _, _ ->
+                        EditableListRow(
+                            label = stringResource(R.string.name),
+                            value = deviceName.text,
+                            onCommit = onRename
+                        )
+                    }
                 }
             }
 
@@ -403,7 +409,6 @@ fun AirPodsSettingsScreen(
                     if (shown(MainSetting.AUTO_CONNECT)) {
                         StyledToggle(
                             label = stringResource(R.string.automatically_connect),
-                            description = stringResource(R.string.automatically_connect_description),
                             checked = state.automaticConnectionEnabled,
                             onCheckedChange = onAutomaticConnectionChanged
                         )
@@ -426,7 +431,6 @@ fun AirPodsSettingsScreen(
                     if (shown(MainSetting.CASE_SOUNDS)) {
                         StyledToggle(
                             label = stringResource(R.string.case_sounds),
-                            description = stringResource(R.string.case_sounds_description),
                             checked = state.caseSounds,
                             onCheckedChange = setCaseSounds
                         )
@@ -807,7 +811,7 @@ fun AirPodsSettingsScreenPreviewApple() {
                 setOffListeningMode = {},
                 disconnect = {},
 
-                navigateToRename = {},
+                onRename = {},
                 navigateToHearingProtection = {},
                 navigateToHearingAid = {},
                 navigateToLeftLongPress = {},
@@ -852,7 +856,7 @@ fun AirPodsSettingsScreenPreviewMaterial() {
                 setOffListeningMode = {},
                 disconnect = {},
 
-                navigateToRename = {},
+                onRename = {},
                 navigateToHearingProtection = {},
                 navigateToHearingAid = {},
                 navigateToLeftLongPress = {},

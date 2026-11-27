@@ -1,63 +1,91 @@
 # Pods for Android
 
-Pods is an Android companion app for managing supported AirPods features, with an interface tailored for Samsung One UI-style devices.
+Pods is an Android companion app for AirPods, with an interface that follows Samsung One UI. It needs no root.
 
-Pods is an independent community project. It is not affiliated with or endorsed by Apple or Samsung. AirPods is a trademark of Apple Inc.
+Pods is an independent community project, not affiliated with or endorsed by Apple or Samsung. AirPods is a trademark of Apple Inc., and the product pictures shown in the app belong to their owner.
+
+## Screenshots
+
+| Home | Controls | Settings |
+|---|---|---|
+| <img src="screenshots/home.png" width="240" alt="Home page with battery levels and listening modes"> | <img src="screenshots/controls.png" width="240" alt="Controls page with press and hold and call controls"> | <img src="screenshots/settings.png" width="240" alt="Settings page"> |
+
+| Equalizer presets | Custom equalizer |
+|---|---|
+| <img src="screenshots/equalizer-presets.png" width="240" alt="Equalizer presets in two columns"> | <img src="screenshots/equalizer-custom.png" width="240" alt="Custom equalizer graph with a reset button"> |
+
+**Battery widget** in different shapes, dark and light:
+
+<img src="screenshots/widgets.png" width="420" alt="Battery widgets in wide, square and small shapes">
+
+Screenshots come from an Android emulator with sample data. On Galaxy phones the app uses the One UI Sans font.
 
 ## Features
 
-Available controls depend on the AirPods model, firmware, Android version, and Bluetooth capabilities reported by the device. Unsupported controls are hidden.
+What you see depends on the AirPods model, firmware and Android version. Unsupported controls are hidden.
 
-- Connect to AirPods and reconnect to the last saved device.
-- View earbud and case battery levels in the app, with a resizable home-screen battery widget (rings turn red at 10% or below) and Quick Settings noise-control tile.
-- Receive one low-battery alert each when an earbud or case reaches 10%, 5%, 2%, and 1%.
-- Change supported listening modes, including noise cancellation, transparency, adaptive audio, and off mode where available.
-- Configure press-and-hold actions, call controls, microphone selection, automatic ear detection, and automatic connection.
-- Adjust supported audio and accessibility features, including conversational awareness, adaptive volume, loud sound reduction, hearing protection, hearing aid, and head gestures.
-- Configure optimized charging and supported sleep detection settings.
-- Adjust the AirPods' own low, mid, and high equalizer on supported models, or open Android or Samsung Sound quality and effects settings. Pods does not process audio.
-- Configure supported connection takeover behavior and advanced options in App Settings.
-- View app and open-source license information.
+### Everyday use
+- Home, Controls, Sound and Settings pages with a floating tab bar.
+- Battery levels for the earbuds and case, and a Quick Settings tile for listening modes.
+- Listening modes: noise cancellation, transparency, adaptive audio and off, where available.
+- Press-and-hold actions, call controls, microphone choice, ear detection and automatic connection.
+- Rename the AirPods directly on the Settings page.
+- Pictures and icons that match the connected model.
 
-Some hearing and accessibility features require compatible AirPods and firmware. The optional “Act as an Apple device” setting appears only when a compatible Xposed environment is detected. Its availability and behavior depend on the device and setup.
+### Equalizer
+- Presets for the AirPods' own three-band equalizer, plus a custom graph for bass, mid and treble.
+- A shortcut to Samsung's or Android's phone equalizer. Pods does not process audio.
+
+### Battery widget
+- Matches the Galaxy battery widget and adapts to its shape: two cells show the earbuds, three add the case, and four or a square add the phone.
+- Rings turn red at 10% or below.
+- Touch and hold the widget and tap **Settings** to choose a system, dark or light background and its transparency.
+
+### Low battery
+- One live notification lists whatever is at 10% or below. It makes a sound at 10%, 5%, 2% and 1%.
+- On Android 16 and later it can appear as a live update. On Galaxy phones, showing it in the Now bar may require **Developer options → Live notifications for all apps**.
+
+### Other settings
+- Charging case sounds on or off. The AirPods do not report this setting, so Pods sends your choice each time they connect.
+- Conversational awareness, personalized and adaptive volume, optimized charging and sleep detection.
+- Accessibility and hearing features on compatible AirPods and firmware, and head gestures.
+- The optional "Act as an Apple device" setting appears only when a compatible Xposed environment is detected.
+
+## Supported AirPods
+
+AirPods 1, 2, 3, 4, 4 with noise cancellation and 5; AirPods Pro 1, 2 and 3. AirPods Max support is experimental and has not been tried on real hardware.
 
 ## Requirements and permissions
 
 - Android 13 (API 33) or newer for the FOSS build.
-- The Play build currently requires Android 16 (API 36) or newer.
-- Bluetooth-capable Android device and compatible AirPods. Feature support varies by model and firmware.
+- Android 16 (API 36) or newer for the Play build.
+- Bluetooth and compatible AirPods.
 
-On first launch, the app opens directly to the main screen and requests the Android permissions it needs. These can include nearby-device Bluetooth access, notifications, and phone-state/call permissions for related controls. Grant only the permissions you want the corresponding features to use.
+On first launch the app asks for the permissions it uses, such as nearby devices, notifications and phone state for call controls. Grant only what the features you want need.
 
-Android shows a silent notification while the background service runs. Pods cannot hide it by itself: tap it, or use the row for it in App settings, and turn the channel off. The service keeps running.
+Android requires a notification while the background service runs. Pods cannot hide it by itself: tap it, or use **App settings → Hide background notification**, and turn that channel off. The service keeps running.
+
+After installing an update, open Pods once so the service starts again.
 
 ## Build
 
-Open the `android` directory in Android Studio, or build from a terminal with JDK 21 and the Android SDK installed. The project uses Android SDK 37 and NDK 30.0.16248370 with CMake 4.1.2.
+Open the `android` directory in Android Studio, or build from a terminal with JDK 21 and the Android SDK. The project uses Android SDK 37 and NDK 30.0.16248370 with CMake 4.1.2.
 
 From the `android` directory:
 
 ```bash
-# FOSS debug APK (Android 13+)
-./gradlew :app:assembleFossDebug
-
-# FOSS release APK (Android 13+)
-./gradlew :app:assembleFossRelease
-
-# Play release bundle (Android 16+)
-./gradlew :app:bundlePlayRelease
-
-# Collect the FOSS APKs and Play bundle in ../release/
-./gradlew :app:packageReleaseArtifacts
+./gradlew :app:testFossDebugUnitTest        # unit tests
+./gradlew :app:assembleFossDebug            # FOSS debug APK
+./gradlew :app:assembleFossRelease          # FOSS release APK
+./gradlew :app:bundlePlayRelease            # Play release bundle
+./gradlew :app:packageReleaseArtifacts      # collect APKs and bundle in ../release/
 ```
 
-Build outputs are written under `app/build/outputs/`. The collected artifacts are written to the repository's `release/` directory.
+Build outputs are written under `app/build/outputs/`.
 
 ### Release signing
 
-Release builds use the signing values in `android/local.properties`. This file and `.jks` keystores are ignored by Git. Keep the keystore and its passwords backed up securely; never commit them.
-
-The required properties are:
+Release builds read the signing values from `android/local.properties`. That file and `.jks` keystores are ignored by Git. Keep the keystore and its passwords backed up and never commit them.
 
 ```properties
 RELEASE_STORE_FILE=/absolute/path/to/pods-upload.jks
@@ -66,20 +94,17 @@ RELEASE_KEY_ALIAS=pods-upload
 RELEASE_KEY_PASSWORD=your-key-password
 ```
 
-For a new Play Store listing, upload the signed `.aab` and enroll in Play App Signing. Play Console's app-signing certificate is the fingerprint used by services that verify the app installed from Google Play; the local keystore certificate is the upload key. For an existing listing, preserve its package name and follow its current Play signing setup.
+For a new Play Store listing, upload the signed `.aab` and enroll in Play App Signing. The local keystore is then the upload key; Play Console shows the app-signing certificate. For an existing listing, keep its package name and signing setup.
 
 ## Project layout
 
-- `android/app/src/main/java/` — Android app and Bluetooth implementation.
-- `android/app/src/main/res/` — app resources and launcher icons.
-- `android/app/build.gradle.kts` — FOSS and Play variants, signing configuration, and release artifact tasks.
-- `docs/` — AirPods protocol notes and reverse-engineering references.
+- `android/app/src/main/java/` — app and Bluetooth code.
+- `android/app/src/main/res/` — resources and launcher icons.
+- `android/app/src/main/res-apple/` — AirPods product pictures.
+- `android/app/src/test/` — unit tests.
+- `android/app/build.gradle.kts` — build variants, version, signing and release tasks.
+- `screenshots/` — images used in this page.
 
 ## License
 
-The app is licensed under the [GNU General Public License v3 or later](https://www.gnu.org/licenses/gpl-3.0.html). Source files retain their copyright notices; third-party notices are available in the in-app Open Source Licenses screen.
-
-## License
-
-Pods is distributed under the [GNU General Public License v3 or later](LICENSE). Source copyright notices and the in-app Open Source Licenses screen provide copyright and third-party license details.
-# pods
+Pods is distributed under the [GNU General Public License v3 or later](LICENSE). Source files keep their copyright notices.

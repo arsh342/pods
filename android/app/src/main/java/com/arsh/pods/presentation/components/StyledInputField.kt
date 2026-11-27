@@ -1,5 +1,10 @@
 package com.arsh.pods.presentation.components
 
+import dev.oneuiproject.oneui.R as OneUiR
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.Icon
 import com.arsh.pods.presentation.theme.appFontFamily
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateDpAsState
@@ -146,24 +151,6 @@ fun StyledInputField(
                                     )
 
                                     innerTextField()
-                                }
-                            }
-                            if (singleLine && !inputState.text.isEmpty()) {
-                                IconButton(
-                                    onClick = {
-                                        inputState.clearText()
-                                    }
-                                ) {
-                                    Text(
-                                        text = "􀁡",
-                                        style = TextStyle(
-                                            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                                            fontFamily = FontFamily(Font(R.font.sf_pro)),
-                                            color = if (isDarkTheme) Color.White.copy(alpha = 0.6f) else Color.Black.copy(
-                                                alpha = 0.6f
-                                            )
-                                        ),
-                                    )
                                 }
                             }
                         }
