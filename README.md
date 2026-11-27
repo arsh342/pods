@@ -1,6 +1,6 @@
 # Pods for Android
 
-Pods is an Android companion app for AirPods, with an interface that follows Samsung One UI. It needs no root.
+Pods is an Android companion app for AirPods, with an interface that follows Samsung One UI. On Android 17 or newer it works without root.
 
 Pods is an independent community project, not affiliated with or endorsed by Apple or Samsung. AirPods is a trademark of Apple Inc., and the product pictures shown in the app belong to their owner.
 
@@ -58,9 +58,15 @@ AirPods 1, 2, 3, 4, 4 with noise cancellation and 5; AirPods Pro 1, 2 and 3. Air
 
 ## Requirements and permissions
 
-- Android 13 (API 33) or newer for the FOSS build.
-- Android 16 (API 36) or newer for the Play build.
-- Bluetooth and compatible AirPods.
+Without root, Pods needs one of these:
+
+- **Android 17 or newer**, on any maker's phone. It is tested on a Galaxy S24 with One UI 9.
+- Android 16 on OnePlus, OPPO or realme phones.
+- A Pixel on an Android 16 `CP1A` build.
+
+Other phones need root with an Xposed framework, because of a limit in Android's Bluetooth system.
+
+You also need Bluetooth and compatible AirPods. The FOSS build installs on Android 13 (API 33) or newer, and the Play build on Android 16 (API 36) or newer.
 
 On first launch the app asks for the permissions it uses, such as nearby devices, notifications and phone state for call controls. Grant only what the features you want need.
 
@@ -108,4 +114,4 @@ For a new Play Store listing, upload the signed `.aab` and enroll in Play App Si
 
 ## License
 
-Pods is distributed under the [GNU General Public License v3 or later](LICENSE). Source files keep their copyright notices.
+Pods is distributed under the [GNU General Public License v3 or later](LICENSE). It is a modified version of earlier GPL-licensed work, changed in 2026, and source files keep their copyright notices.
