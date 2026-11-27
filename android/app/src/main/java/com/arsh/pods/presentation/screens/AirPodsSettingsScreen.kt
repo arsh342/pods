@@ -277,10 +277,7 @@ fun AirPodsSettingsScreen(
                 BatteryView(
                     batteryList = state.battery,
                     budsRes = state.instance?.model?.budsRes ?: R.drawable.airpods_pro_2_buds,
-                    caseRes = state.instance?.model?.caseRes ?: R.drawable.airpods_pro_2_case,
-                    leftIcon = state.instance?.model?.leftIconRes ?: R.drawable.airpods_pro_left_notification,
-                    rightIcon = state.instance?.model?.rightIconRes ?: R.drawable.airpods_pro_right_notification,
-                    caseIcon = state.instance?.model?.caseIconRes ?: R.drawable.airpods_pro_case_notification
+                    caseRes = state.instance?.model?.caseRes ?: R.drawable.airpods_pro_2_case
                 )
             }
 

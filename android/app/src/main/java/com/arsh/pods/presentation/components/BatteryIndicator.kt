@@ -20,7 +20,6 @@ package com.arsh.pods.presentation.components
 
 
 import dev.oneuiproject.oneui.R as OneUiR
-import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Icon
 import android.content.res.Configuration
@@ -56,7 +55,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arsh.pods.R
 import com.arsh.pods.data.BatteryStatus
 import com.arsh.pods.presentation.theme.PodsTheme
 import kotlin.math.cos
@@ -68,8 +66,6 @@ import kotlin.math.sqrt
 fun BatteryIndicator(
     batteryPercentage: Int,
     status: Int,
-    // A small drawing of the part, shown before the level when several are listed apart.
-    prefixIcon: Int? = null,
     previousCharging: Boolean = false,
 ) {
     val isDarkTheme = isSystemInDarkTheme()
@@ -191,23 +187,11 @@ fun BatteryIndicator(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            prefixIcon?.let {
-                Icon(
-                    painter = painterResource(it),
-                    contentDescription = null,
-                    tint = batteryTextColor,
-                    modifier = Modifier
-                        .padding(end = 3.dp)
-                        .size(14.dp)
-                )
-            }
-            Text(
-                text = "$batteryPercentage%",
-                color = batteryTextColor,
-                style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center)
-            )
-        }
+        Text(
+            text = "$batteryPercentage%",
+            color = batteryTextColor,
+            style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center)
+        )
     }
 }
 
@@ -218,7 +202,6 @@ fun BatteryIndicatorPreview() {
         BatteryIndicator(
             batteryPercentage = 50,
             status = BatteryStatus.OPTIMIZED_CHARGING,
-            prefixIcon = R.drawable.airpods_4_left_notification,
             previousCharging = false
         )
     }

@@ -14,11 +14,11 @@ Pods is an independent community project, not affiliated with or endorsed by App
 |---|---|
 | <img src="screenshots/equalizer-presets.png" width="240" alt="Equalizer presets in two columns"> | <img src="screenshots/equalizer-custom.png" width="240" alt="Custom equalizer graph with a reset button"> |
 
-**Battery widget** in different shapes, dark and light:
+**Battery widgets** in several sizes on the home screen:
 
-<img src="screenshots/widgets.png" width="420" alt="Battery widgets in wide, square and small shapes">
+<img src="screenshots/widgets.png" width="360" alt="Battery widgets in 3×2, 1×2, large and 4×1 sizes, dark and light">
 
-Screenshots come from an Android emulator with sample data. On Galaxy phones the app uses the One UI Sans font.
+Screenshots are from a Galaxy S24 with AirPods 4 (ANC).
 
 ## Features
 
@@ -38,6 +38,7 @@ What you see depends on the AirPods model, firmware and Android version. Unsuppo
 
 ### Battery widget
 - Matches the Galaxy battery widget and adapts to its shape: two cells show the earbuds, three add the case, and four or a square add the phone.
+- Sizes with spare room, such as 3×2, 2×3 and 4×2, fill it with empty rings. Anything larger shows the AirPods pictures in large rings.
 - Rings turn red at 10% or below.
 - Touch and hold the widget and tap **Settings** to choose a system, dark or light background and its transparency.
 

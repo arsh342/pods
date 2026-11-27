@@ -52,10 +52,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 fun BatteryView(
     batteryList: List<Battery>,
     budsRes: Int,
-    caseRes: Int,
-    leftIcon: Int = R.drawable.airpods_pro_left_notification,
-    rightIcon: Int = R.drawable.airpods_pro_right_notification,
-    caseIcon: Int = R.drawable.airpods_pro_case_notification
+    caseRes: Int
 ) {
     val left = batteryList.find { it.component == BatteryComponent.LEFT }
     val right = batteryList.find { it.component == BatteryComponent.RIGHT }
@@ -127,11 +124,7 @@ fun BatteryView(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         if (showLeftBattery) {
-                            BatteryIndicator(
-                                leftLevel,
-                                left.status,
-                                prefixIcon = leftIcon
-                            )
+                            BatteryIndicator(leftLevel, left.status)
                         }
 
                         if (showLeftBattery && showRightBattery) {
@@ -139,11 +132,7 @@ fun BatteryView(
                         }
 
                         if (showRightBattery) {
-                            BatteryIndicator(
-                                rightLevel,
-                                right.status,
-                                prefixIcon = rightIcon
-                            )
+                            BatteryIndicator(rightLevel, right.status)
                         }
                     }
                 }
@@ -163,11 +152,7 @@ fun BatteryView(
                 )
 
                 if (caseLevel > 0 || case?.status != BatteryStatus.DISCONNECTED) {
-                    BatteryIndicator(
-                        caseLevel,
-                        case?.status ?: BatteryStatus.NOT_CHARGING,
-                        prefixIcon = caseIcon.takeIf { !combineEarbudBatteries }
-                    )
+                    BatteryIndicator(caseLevel, case?.status ?: BatteryStatus.NOT_CHARGING)
                 }
             }
         }
