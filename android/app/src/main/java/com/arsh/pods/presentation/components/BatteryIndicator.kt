@@ -56,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arsh.pods.data.BatteryStatus
+import com.arsh.pods.presentation.widgets.isLowBattery
 import com.arsh.pods.presentation.theme.PodsTheme
 import kotlin.math.cos
 import kotlin.math.min
@@ -71,7 +72,7 @@ fun BatteryIndicator(
     val isDarkTheme = isSystemInDarkTheme()
     val batteryTextColor = if (isDarkTheme) Color.White else Color.Black
     val batteryFillColor =
-        if (batteryPercentage > 25) if (isDarkTheme) Color(0xFF2ED158) else Color(0xFF35C759)
+        if (!isLowBattery(batteryPercentage)) if (isDarkTheme) Color(0xFF2ED158) else Color(0xFF35C759)
         else if (isDarkTheme) Color(0xFFFC4244) else Color(0xFFfe373C)
 
     val initialScale = if (previousCharging) 1f else 0f

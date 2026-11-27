@@ -81,10 +81,10 @@ class BatteryWidgetLayoutTest {
     }
 
     @Test
-    fun ringsTurnRedAtTenPercentOrBelow() {
-        assertTrue(isLowBattery(10))
+    fun ringsTurnRedAtTwentyPercentOrBelow() {
+        assertTrue(isLowBattery(20))
         assertTrue(isLowBattery(1))
-        assertFalse(isLowBattery(11))
+        assertFalse(isLowBattery(21))
         assertFalse(isLowBattery(0))
     }
 

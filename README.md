@@ -40,17 +40,19 @@ What you see depends on the AirPods model, firmware and Android version. Unsuppo
 - Pictures and icons that match the connected model.
 
 ### Equalizer
-- Presets for the AirPods' own three-band equalizer, plus a custom graph for bass, mid and treble.
+- Flat (the default) and presets for the AirPods' own three-band equalizer, plus a custom graph for bass, mid and treble.
+- Your hand-made setting is saved as **Custom** next to the presets, so you can switch back to it. Reset clears it.
 - A shortcut to Samsung's or Android's phone equalizer. Pods does not process audio.
 
 ### Battery widget
 - Matches the Galaxy battery widget and adapts to its shape: two cells show the earbuds, three add the case, and four or a square add the phone.
 - Sizes with spare room, such as 3×2, 2×3 and 4×2, fill it with empty rings. Anything larger shows the AirPods pictures in large rings.
-- Rings turn red at 10% or below.
+- Rings turn red at 20% or below, in the widget and in the app.
 - Touch and hold the widget and tap **Settings** to choose a system, dark or light background and its transparency.
 
 ### Low battery
-- One live notification lists whatever is at 10% or below. It makes a sound at 10%, 5%, 2% and 1%.
+- One notification lists whatever is at 10% or below, and pops up at 10%, 5%, 2% and 1%.
+- Where live notifications are available it stays up and follows the levels in between. Otherwise it appears only at those four levels.
 - On Android 16 and later it can appear as a live update. On Galaxy phones, showing it in the Now bar may require **Developer options → Live notifications for all apps**.
 
 ### Other settings

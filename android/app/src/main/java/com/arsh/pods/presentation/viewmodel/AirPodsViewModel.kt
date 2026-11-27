@@ -49,6 +49,9 @@ import com.arsh.pods.data.BatteryComponent
 import com.arsh.pods.data.BatteryStatus
 import com.arsh.pods.data.Capability
 import com.arsh.pods.data.CustomEq
+import com.arsh.pods.data.EqBands
+import com.arsh.pods.data.EqMemory
+import com.arsh.pods.data.EqPreset
 import com.arsh.pods.data.ControlCommandRepository
 import com.arsh.pods.data.StemAction
 import com.arsh.pods.data.XposedRemotePrefProvider
@@ -98,6 +101,7 @@ data class AirPodsUiState(
 
     val customEq: CustomEq = CustomEq(state = 1, low = 50, mid = 50, high = 50),
     val customEqReported: Boolean = false,
+    val eqMemory: EqMemory = EqMemory(),
 
     val connectionSuccessful: Boolean = false,
 )
@@ -208,6 +212,7 @@ class AirPodsViewModel(
         loadATT()
         observeATT()
         observeSharedPreferences()
+        loadEqMemory()
         observeCustomEq()
         if (isDemoMode) activateDemoMode()
         isReady = true
@@ -250,25 +255,69 @@ class AirPodsViewModel(
 
     private fun observeCustomEq() {
         service.aacpManager.customEqCallback = { eq ->
-            if (!isDemoMode) _uiState.update { it.copy(customEq = eq, customEqReported = true) }
+            if (!isDemoMode) {
+                _uiState.update { it.copy(customEq = eq, customEqReported = true) }
+                rememberEq(_uiState.value.eqMemory.reported(eq))
+            }
         }
         // The AirPods may have reported their EQ before this view model existed.
         _uiState.update {
             it.copy(customEq = service.aacpManager.customEq, customEqReported = service.aacpManager.customEqReported)
         }
+        if (service.aacpManager.customEqReported) {
+            rememberEq(_uiState.value.eqMemory.reported(service.aacpManager.customEq))
+        }
     }
 
-    fun setCustomEqEnabled(enabled: Boolean) {
-        sendCustomEq(_uiState.value.customEq.withEnabled(enabled))
+    /** Picks Flat or a preset; the saved hand-made setting stays as it is. */
+    fun selectEq(preset: EqPreset?) {
+        rememberEq(_uiState.value.eqMemory.picked())
+        applyCustomEq(preset?.let { EqBands(it.low, it.mid, it.high) } ?: EqBands.FLAT)
     }
 
-    /** Turns the custom equalizer on with these bands, as a preset does. */
-    fun applyCustomEq(low: Int, mid: Int, high: Int) {
-        sendCustomEq(_uiState.value.customEq.withBands(low, mid, high).withEnabled(true))
+    /** Brings back the saved hand-made setting. False when there is none yet. */
+    fun selectSavedEq(): Boolean {
+        val saved = _uiState.value.eqMemory.saved ?: return false
+        rememberEq(_uiState.value.eqMemory.restored())
+        applyCustomEq(saved)
+        return true
     }
 
-    fun setCustomEq(low: Int, mid: Int, high: Int) {
-        sendCustomEq(_uiState.value.customEq.withBands(low, mid, high))
+    /** A change on the graph, which becomes the saved setting. */
+    fun editCustomEq(low: Int, mid: Int, high: Int) {
+        val bands = EqBands(low, mid, high)
+        rememberEq(_uiState.value.eqMemory.edited(bands))
+        applyCustomEq(bands)
+    }
+
+    /** Flattens the sound and forgets the saved setting. */
+    fun resetCustomEq() {
+        rememberEq(EqMemory())
+        applyCustomEq(EqBands.FLAT)
+    }
+
+    private fun applyCustomEq(bands: EqBands) {
+        sendCustomEq(_uiState.value.customEq.withBands(bands.low, bands.mid, bands.high).withEnabled(true))
+    }
+
+    private fun rememberEq(memory: EqMemory) {
+        _uiState.update { it.copy(eqMemory = memory) }
+        if (isDemoMode) return
+        sharedPreferences.edit {
+            val saved = memory.saved
+            if (saved == null) remove("eq_custom")
+            else putString("eq_custom", "${saved.low},${saved.mid},${saved.high}")
+            putBoolean("eq_custom_chosen", memory.chosen)
+        }
+    }
+
+    private fun loadEqMemory() {
+        val saved = sharedPreferences.getString("eq_custom", null)
+            ?.split(",")?.mapNotNull { it.toIntOrNull() }
+            ?.takeIf { bands -> bands.size == 3 && bands.all { it in 0..100 } }
+            ?.let { EqBands(it[0], it[1], it[2]) }
+        val chosen = sharedPreferences.getBoolean("eq_custom_chosen", false)
+        _uiState.update { it.copy(eqMemory = EqMemory(saved, chosen)) }
     }
 
     private fun sendCustomEq(eq: CustomEq) {

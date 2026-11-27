@@ -24,6 +24,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.edit
 import com.arsh.pods.MainActivity
 import com.arsh.pods.data.AirPodsModels
@@ -32,8 +33,9 @@ import com.arsh.pods.data.BatteryComponent
 import com.arsh.pods.receivers.LowBatteryDismissReceiver
 
 /**
- * One live update for whatever is running low. Android 16 and later promote it to the lock screen and
- * a status bar chip where the phone allows that; otherwise it is an ordinary ongoing notification.
+ * One notification for whatever is running low, which pops up at each threshold. Where the phone shows
+ * live updates (Android 16 and later) it also stays up and follows the levels in between; otherwise it
+ * is an ordinary notification posted only at the thresholds.
  */
 object LowBatteryNotification {
     const val PREFERENCES = "low_battery"
@@ -53,20 +55,28 @@ object LowBatteryNotification {
     /** [parts] is what is low now; [newThreshold] is true when one has just reached the next step down. */
     fun refresh(context: Context, channel: String, parts: List<Battery>, newThreshold: Boolean) {
         val preferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
-        context.getSystemService(NotificationManager::class.java).let { manager -> OLD_IDS.forEach(manager::cancel) }
-        val action = liveAction(parts.isNotEmpty(), newThreshold, preferences.getBoolean(DISMISSED, false))
+        val manager = context.getSystemService(NotificationManager::class.java)
+        OLD_IDS.forEach(manager::cancel)
+        val live = NotificationManagerCompat.from(context).canPostPromotedNotifications()
+        val action = liveAction(live, parts.isNotEmpty(), newThreshold, preferences.getBoolean(DISMISSED, false))
         when (action) {
             LiveAction.REMOVE -> remove(context)
             LiveAction.LEAVE -> Unit
             LiveAction.ALERT, LiveAction.UPDATE -> {
-                if (action == LiveAction.ALERT) preferences.edit { putBoolean(DISMISSED, false) }
-                context.getSystemService(NotificationManager::class.java)
-                    .notify(ID, build(context, channel, parts, alert = action == LiveAction.ALERT))
+                val alert = action == LiveAction.ALERT
+                if (alert) {
+                    preferences.edit { putBoolean(DISMISSED, false) }
+                    // Posted afresh, so it pops up again over whatever is on screen.
+                    manager.cancel(ID)
+                }
+                manager.notify(ID, build(context, channel, parts, live, alert))
             }
         }
     }
 
-    private fun build(context: Context, channel: String, parts: List<Battery>, alert: Boolean): Notification {
+    private fun build(
+        context: Context, channel: String, parts: List<Battery>, live: Boolean, alert: Boolean
+    ): Notification {
         val lowest = parts.minOf { it.level }
         val open = PendingIntent.getActivity(
             context, 50, Intent(context, MainActivity::class.java),
@@ -92,10 +102,12 @@ object LowBatteryNotification {
             .setContentIntent(open)
             .setDeleteIntent(dismissed)
             .setCategory(Notification.CATEGORY_STATUS)
-            .setOngoing(true)
+            .setOngoing(live)
+            .setAutoCancel(!live)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setSilent(!alert)
             .setShowWhen(false)
-            .setRequestPromotedOngoing(true)
+            .setRequestPromotedOngoing(live)
             // The few characters shown in the status bar chip.
             .setShortCriticalText("$lowest%")
             .setStyle(

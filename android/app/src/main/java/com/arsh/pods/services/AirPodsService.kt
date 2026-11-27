@@ -1725,7 +1725,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             "AirPods Low Battery",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "A live update while an AirPod or the case is at 10% or below, with a sound at 10%, 5%, 2% and 1%"
+            description = "Pops up when an AirPod or the case reaches 10%, 5%, 2% and 1%, and stays as a live update where supported"
         }
 
         val notificationManager = getSystemService(NotificationManager::class.java)

@@ -37,13 +37,14 @@ enum class LiveAction {
     ALERT,
     /** Show the current levels silently. */
     UPDATE,
-    /** The user swiped it away; do not bring it back yet. */
+    /** Post nothing: it was swiped away, or without live updates no new threshold was reached. */
     LEAVE
 }
 
-fun liveAction(anyLow: Boolean, newThreshold: Boolean, dismissed: Boolean): LiveAction = when {
+/** [live] is whether the phone shows live updates, which stay up and follow the levels. */
+fun liveAction(live: Boolean, anyLow: Boolean, newThreshold: Boolean, dismissed: Boolean): LiveAction = when {
     !anyLow -> LiveAction.REMOVE
     newThreshold -> LiveAction.ALERT
-    dismissed -> LiveAction.LEAVE
+    !live || dismissed -> LiveAction.LEAVE
     else -> LiveAction.UPDATE
 }

@@ -20,8 +20,7 @@ package com.arsh.pods.data
 import com.arsh.pods.R
 
 /**
- * Starting points for the AirPods' three-band equalizer, where 50 is flat. There is no flat preset:
- * the AirPods' own tuning (the custom equalizer off) sounds the same. The bands are a bass shelf
+ * Starting points for the AirPods' three-band equalizer, where 50 is flat. The bands are a bass shelf
  * below about 150 Hz, a mid band around 1 kHz and a treble shelf above about 5 kHz, each roughly
  * ±8 dB, so a step of about 6 is 1 dB. Changes are kept within a few decibels, as tuning guides advise.
  */
@@ -35,13 +34,53 @@ enum class EqPreset(val label: Int, val low: Int, val mid: Int, val high: Int) {
     ROCK(R.string.eq_preset_rock, 68, 42, 66),
     POP(R.string.eq_preset_pop, 58, 62, 46),
     ELECTRONIC(R.string.eq_preset_electronic, 76, 44, 62),
-    ACOUSTIC(R.string.eq_preset_acoustic, 46, 56, 60),
-    // Fuller and softer: a little more bass, a little less treble.
-    WARM(R.string.eq_preset_warm, 62, 54, 40);
+    ACOUSTIC(R.string.eq_preset_acoustic, 46, 56, 60);
 
     companion object {
         /** The preset that is exactly the current setting, if any. */
         fun matching(eq: CustomEq): EqPreset? =
             entries.find { it.low == eq.low && it.mid == eq.mid && it.high == eq.high }
     }
+}
+
+data class EqBands(val low: Int, val mid: Int, val high: Int) {
+    companion object {
+        val FLAT = EqBands(50, 50, 50)
+    }
+}
+
+val CustomEq.bands: EqBands get() = EqBands(low, mid, high)
+
+/** Which option of the equalizer is the current one. There is always exactly one. */
+sealed interface EqChoice {
+    data object Flat : EqChoice
+    data object Custom : EqChoice
+    data class Preset(val preset: EqPreset) : EqChoice
+}
+
+/**
+ * The hand-made setting kept by the app. [chosen] says it was edited or picked last, which keeps it
+ * shown as Custom even when its bands happen to equal a preset.
+ */
+data class EqMemory(val saved: EqBands? = null, val chosen: Boolean = false) {
+    fun choice(eq: CustomEq): EqChoice {
+        if (!eq.isEnabled() || eq.bands == EqBands.FLAT) return EqChoice.Flat
+        if (chosen && eq.bands == saved) return EqChoice.Custom
+        return EqPreset.matching(eq)?.let { EqChoice.Preset(it) } ?: EqChoice.Custom
+    }
+
+    /** After a change on the graph. A flat result is nothing worth keeping. */
+    fun edited(bands: EqBands): EqMemory =
+        if (bands == EqBands.FLAT) EqMemory() else EqMemory(bands, chosen = true)
+
+    /** After Flat or a preset is picked. */
+    fun picked(): EqMemory = copy(chosen = false)
+
+    /** After the saved setting is picked. */
+    fun restored(): EqMemory = copy(chosen = true)
+
+    /** Keeps a setting the AirPods report that is neither flat nor a preset. */
+    fun reported(eq: CustomEq): EqMemory =
+        if (eq.isEnabled() && eq.bands != EqBands.FLAT && EqPreset.matching(eq) == null) edited(eq.bands)
+        else this
 }

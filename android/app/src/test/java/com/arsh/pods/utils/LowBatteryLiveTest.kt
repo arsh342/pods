@@ -38,24 +38,24 @@ class LowBatteryLiveTest {
 
     @Test
     fun goesAwayWhenNothingIsLow() {
-        assertEquals(LiveAction.REMOVE, liveAction(anyLow = false, newThreshold = false, dismissed = false))
-        assertEquals(LiveAction.REMOVE, liveAction(anyLow = false, newThreshold = false, dismissed = true))
+        assertEquals(LiveAction.REMOVE, liveAction(live = true, anyLow = false, newThreshold = false, dismissed = false))
+        assertEquals(LiveAction.REMOVE, liveAction(live = true, anyLow = false, newThreshold = false, dismissed = true))
     }
 
     @Test
     fun alertsAtEachNewThresholdEvenAfterBeingDismissed() {
-        assertEquals(LiveAction.ALERT, liveAction(anyLow = true, newThreshold = true, dismissed = false))
-        assertEquals(LiveAction.ALERT, liveAction(anyLow = true, newThreshold = true, dismissed = true))
+        assertEquals(LiveAction.ALERT, liveAction(live = true, anyLow = true, newThreshold = true, dismissed = false))
+        assertEquals(LiveAction.ALERT, liveAction(live = true, anyLow = true, newThreshold = true, dismissed = true))
     }
 
     @Test
     fun updatesQuietlyBetweenThresholds() {
-        assertEquals(LiveAction.UPDATE, liveAction(anyLow = true, newThreshold = false, dismissed = false))
+        assertEquals(LiveAction.UPDATE, liveAction(live = true, anyLow = true, newThreshold = false, dismissed = false))
     }
 
     @Test
     fun staysAwayOnceDismissed() {
-        assertEquals(LiveAction.LEAVE, liveAction(anyLow = true, newThreshold = false, dismissed = true))
+        assertEquals(LiveAction.LEAVE, liveAction(live = true, anyLow = true, newThreshold = false, dismissed = true))
     }
 
     @Test
@@ -63,5 +63,22 @@ class LowBatteryLiveTest {
         val battery = listOf(Battery(HEADSET, 7, NOT_CHARGING))
 
         assertEquals(listOf(HEADSET), lowBatteryParts(battery).map { it.component })
+    }
+
+    @Test
+    fun withoutLiveUpdatesNotifiesOnlyAtEachThreshold() {
+        fun plain(newThreshold: Boolean) =
+            liveAction(live = false, anyLow = true, newThreshold = newThreshold, dismissed = false)
+
+        assertEquals(LiveAction.ALERT, plain(newThreshold = true))
+        assertEquals(LiveAction.LEAVE, plain(newThreshold = false))
+    }
+
+    @Test
+    fun withoutLiveUpdatesStillGoesAwayWhenNothingIsLow() {
+        assertEquals(
+            LiveAction.REMOVE,
+            liveAction(live = false, anyLow = false, newThreshold = false, dismissed = false)
+        )
     }
 }

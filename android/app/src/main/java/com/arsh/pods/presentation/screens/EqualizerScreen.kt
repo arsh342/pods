@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextAlign
 import com.arsh.pods.presentation.components.EqualizerGraph
 import com.arsh.pods.data.EqPreset
-import com.arsh.pods.data.CustomEq
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.semantics.Role
@@ -67,6 +66,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arsh.pods.R
 import com.arsh.pods.data.Capability
+import com.arsh.pods.data.EqBands
+import com.arsh.pods.data.EqChoice
 import com.arsh.pods.presentation.components.StyledList
 import com.arsh.pods.presentation.components.StyledListItem
 import com.arsh.pods.presentation.components.StyledSlider
@@ -106,7 +107,7 @@ fun EqualizerScreen(viewModel: AirPodsViewModel) {
         sendJob?.cancel()
         sendJob = scope.launch {
             delay(150)
-            viewModel.setCustomEq(
+            viewModel.editCustomEq(
                 low.floatValue.roundToInt(),
                 mid.floatValue.roundToInt(),
                 high.floatValue.roundToInt()
@@ -125,11 +126,24 @@ fun EqualizerScreen(viewModel: AirPodsViewModel) {
         Spacer(modifier = Modifier.height(topPadding))
 
         if (Capability.CUSTOM_EQ in state.capabilities) {
-            val shown = CustomEq(eq.state, low.floatValue.roundToInt(), mid.floatValue.roundToInt(), high.floatValue.roundToInt())
-            val preset = EqPreset.matching(shown).takeIf { eq.isEnabled() }
-            // Recommended lists the presets; Custom is for a hand-made setting.
-            var showCustom by rememberSaveable { mutableStateOf(eq.isEnabled() && preset == null) }
-            LaunchedEffect(eq) { if (eq.isEnabled() && EqPreset.matching(eq) == null) showCustom = true }
+            val current = state.eqMemory.choice(eq)
+            // Recommended lists the choices; Custom is the graph for a hand-made setting.
+            var showCustom by rememberSaveable { mutableStateOf(false) }
+            /** Shows these bands at once, and drops a graph change still waiting to be sent. */
+            fun show(bands: EqBands) {
+                sendJob?.cancel()
+                low.floatValue = bands.low.toFloat()
+                mid.floatValue = bands.mid.toFloat()
+                high.floatValue = bands.high.toFloat()
+            }
+            fun openGraph() {
+                showCustom = true
+                // The graph only works once the custom equalizer is on, and starts flat.
+                if (!eq.isEnabled()) {
+                    show(EqBands.FLAT)
+                    viewModel.selectEq(null)
+                }
+            }
 
             SegmentedSelector(
                 title = stringResource(R.string.airpods_equalizer),
@@ -138,23 +152,25 @@ fun EqualizerScreen(viewModel: AirPodsViewModel) {
                     true to stringResource(R.string.custom)
                 ),
                 selected = showCustom,
-                onSelect = { custom ->
-                    showCustom = custom
-                    // The graph only works once the custom equalizer is on.
-                    if (custom && !eq.isEnabled()) viewModel.setCustomEqEnabled(true)
-                }
+                onSelect = { custom -> if (custom) openGraph() else showCustom = false }
             )
 
             if (!showCustom) {
-                // The AirPods' own tuning first, then the presets, two to a row.
-                val choices: List<EqPreset?> = listOf(null) + EqPreset.entries
+                // Flat first, then the presets and the saved setting, two to a row.
+                val choices = listOf(EqChoice.Flat) +
+                    EqPreset.entries.map { EqChoice.Preset(it) } + EqChoice.Custom
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     choices.chunked(2).forEach { pair ->
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             pair.forEach { choice ->
-                                val selected = if (choice == null) !eq.isEnabled() else choice == preset
+                                val selected = choice == current
+                                val label = when (choice) {
+                                    EqChoice.Flat -> R.string.eq_preset_flat
+                                    EqChoice.Custom -> R.string.custom
+                                    is EqChoice.Preset -> choice.preset.label
+                                }
                                 Text(
-                                    text = stringResource(choice?.label ?: R.string.eq_preset_default),
+                                    text = stringResource(label),
                                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                                     color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                                     textAlign = TextAlign.Center,
@@ -168,13 +184,21 @@ fun EqualizerScreen(viewModel: AirPodsViewModel) {
                                         )
                                         .selectable(selected = selected, role = Role.RadioButton) {
                                             if (!selected) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                            if (choice == null) {
-                                                viewModel.setCustomEqEnabled(false)
-                                            } else {
-                                                low.floatValue = choice.low.toFloat()
-                                                mid.floatValue = choice.mid.toFloat()
-                                                high.floatValue = choice.high.toFloat()
-                                                viewModel.applyCustomEq(choice.low, choice.mid, choice.high)
+                                            when (choice) {
+                                                EqChoice.Flat -> {
+                                                    show(EqBands.FLAT)
+                                                    viewModel.selectEq(null)
+                                                }
+                                                is EqChoice.Preset -> {
+                                                    val preset = choice.preset
+                                                    show(EqBands(preset.low, preset.mid, preset.high))
+                                                    viewModel.selectEq(preset)
+                                                }
+                                                // With nothing saved yet, the graph is where to make one.
+                                                EqChoice.Custom -> {
+                                                    state.eqMemory.saved?.let { show(it) }
+                                                    if (!viewModel.selectSavedEq()) openGraph()
+                                                }
                                             }
                                         }
                                         .padding(vertical = 14.dp)
@@ -207,10 +231,8 @@ fun EqualizerScreen(viewModel: AirPodsViewModel) {
                 StyledButton(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                        low.floatValue = 50f
-                        mid.floatValue = 50f
-                        high.floatValue = 50f
-                        sendBands()
+                        show(EqBands.FLAT)
+                        viewModel.resetCustomEq()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

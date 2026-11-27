@@ -323,6 +323,5 @@
     <string name="eq_preset_electronic">Electronic</string>
     <string name="eq_preset_acoustic">Acoustic</string>
     <string name="eq_presets">Presets</string>
-    <string name="eq_preset_default">Default</string>
-    <string name="eq_preset_warm">Warm</string>
+    <string name="eq_preset_flat">Flat</string>
 </resources>

@@ -79,7 +79,8 @@ private fun grid(across: Int, down: Int, readings: List<WidgetSlot>): WidgetArra
     return WidgetArrangement(WidgetShape.GRID, readings + empty, columns = across)
 }
 
-fun isLowBattery(level: Int): Boolean = level in 1..10
+/** Rings turn red from here down, in the widget and in the app; alerts start later, at 10%. */
+fun isLowBattery(level: Int): Boolean = level in 1..20
 
 /** The largest size with the drawing's own proportions that fits a square of side [box]. */
 fun fittedSize(width: Float, height: Float, box: Float): Pair<Float, Float> {
