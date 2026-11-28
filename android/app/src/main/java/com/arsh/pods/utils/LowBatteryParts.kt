@@ -25,26 +25,11 @@ import com.arsh.pods.data.BatteryStatus
 private val order =
     listOf(BatteryComponent.HEADSET, BatteryComponent.LEFT, BatteryComponent.RIGHT, BatteryComponent.CASE)
 
-/** The parts that belong in the low battery live update: at 10% or below and running down. */
-fun lowBatteryParts(battery: List<Battery>): List<Battery> = battery
-    .filter { it.level in 1..10 && it.status == BatteryStatus.NOT_CHARGING }
+/** The parts that call for the low battery notification: at 10% or below and running down. */
+fun lowBatteryParts(battery: List<Battery>): List<Battery> = shownBatteryParts(battery)
+    .filter { it.level <= 10 && it.status == BatteryStatus.NOT_CHARGING }
+
+/** The parts the notification pictures: every one with a known level, left to right. */
+fun shownBatteryParts(battery: List<Battery>): List<Battery> = battery
+    .filter { it.level in 1..100 && it.status != BatteryStatus.DISCONNECTED }
     .sortedBy { order.indexOf(it.component) }
-
-enum class LiveAction {
-    /** Take the live update away. */
-    REMOVE,
-    /** Show it and make a sound: a part has just reached a new threshold. */
-    ALERT,
-    /** Show the current levels silently. */
-    UPDATE,
-    /** Post nothing: it was swiped away, or without live updates no new threshold was reached. */
-    LEAVE
-}
-
-/** [live] is whether the phone shows live updates, which stay up and follow the levels. */
-fun liveAction(live: Boolean, anyLow: Boolean, newThreshold: Boolean, dismissed: Boolean): LiveAction = when {
-    !anyLow -> LiveAction.REMOVE
-    newThreshold -> LiveAction.ALERT
-    !live || dismissed -> LiveAction.LEAVE
-    else -> LiveAction.UPDATE
-}

@@ -102,7 +102,6 @@ import com.arsh.pods.data.XposedRemotePrefProvider
 import com.arsh.pods.data.isHeadTrackingData
 import com.arsh.pods.presentation.widgets.BatteryWidget
 import com.arsh.pods.presentation.widgets.BatteryWidgetRenderer
-import com.arsh.pods.utils.lowBatteryParts
 import com.arsh.pods.utils.LowBatteryNotification
 import com.arsh.pods.utils.GestureDetector
 import com.arsh.pods.utils.HeadTracking
@@ -1725,7 +1724,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             "AirPods Low Battery",
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Pops up when an AirPod or the case reaches 10%, 5%, 2% and 1%, and stays as a live update where supported"
+            description = "Pops up when an AirPod or the case reaches 10%, 5%, 2% and 1%"
         }
 
         val notificationManager = getSystemService(NotificationManager::class.java)
@@ -1910,8 +1909,7 @@ class AirPodsService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         }
 
         LowBatteryNotification.refresh(
-            this, LOW_BATTERY_NOTIFICATION_CHANNEL,
-            lowBatteryParts(batteryNotification.getBattery()), newThreshold
+            this, LOW_BATTERY_NOTIFICATION_CHANNEL, batteryNotification.getBattery(), newThreshold
         )
     }
 

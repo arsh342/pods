@@ -51,9 +51,8 @@ What you see depends on the AirPods model, firmware and Android version. Unsuppo
 - Touch and hold the widget and tap **Settings** to choose a system, dark or light background and its transparency.
 
 ### Low battery
-- One notification lists whatever is at 10% or below, and pops up at 10%, 5%, 2% and 1%.
-- Where live notifications are available it stays up and follows the levels in between. Otherwise it appears only at those four levels.
-- On Android 16 and later it can appear as a live update. On Galaxy phones, showing it in the Now bar may require **Developer options → Live notifications for all apps**.
+- A notification pops up when an AirPod or the case reaches 10%, 5%, 2% and 1%.
+- It looks like the home page, with a picture, battery ring and level for each part.
 
 ### Other settings
 - Charging case sounds on or off. The AirPods do not report this setting, so Pods sends your choice each time they connect.
