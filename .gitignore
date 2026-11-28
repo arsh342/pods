@@ -28,8 +28,10 @@ captures/
 cmake-build-*/
 CMakeLists.txt.user*
 
-# Documentation (only the published privacy policy is tracked)
+# Documentation (only the published website is tracked)
 docs/*
+!docs/index.html
+!docs/assets/
 !docs/privacy/
 oneui_design_guide_eng.pdf
 

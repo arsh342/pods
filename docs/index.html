@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pods: AirPods on Android</title>
+<meta name="description" content="Pods is an Android companion app for AirPods, with battery levels, listening modes, an equalizer and widgets in a One UI style.">
+<link rel="icon" href="assets/icon.png">
+<style>
+  :root {
+    color-scheme: light dark;
+    --background: #f1f1f3;
+    --card: #fcfcff;
+    --text: #1c1c1e;
+    --muted: #5f5f65;
+    --line: #e4e4e8;
+    --link: #1f5fd6;
+    --button: #1c66e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #010102;
+      --card: #17171a;
+      --text: #f5f5f5;
+      --muted: #a1a1a8;
+      --line: #2c2c30;
+      --link: #8dbbff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  a { color: var(--link); }
+  a:focus-visible { outline: 3px solid var(--link); outline-offset: 3px; }
+  h1, h2, h3 { line-height: 1.25; font-weight: 600; }
+  h2 { margin: 0 8px 16px; font-size: 22px; }
+  h3 { margin: 0 0 4px; font-size: 17px; }
+  p { margin: 0; }
+  section { margin-bottom: 48px; }
+
+  .hero { text-align: center; padding: 56px 0 8px; }
+  .hero img { width: 104px; height: 104px; }
+  h1 { margin: 12px 0 8px; font-size: 44px; }
+  .hero p { max-width: 480px; margin: 0 auto; color: var(--muted); font-size: 18px; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 24px; }
+  .button {
+    display: inline-block;
+    padding: 11px 24px;
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .button.primary { background: var(--button); color: #fff; }
+  .button:hover { filter: brightness(0.94); }
+
+  .screens { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .screens figure { margin: 0; text-align: center; }
+  .screens img { display: block; width: 100%; height: auto; border-radius: 20px; border: 1px solid var(--line); }
+  figcaption { margin-top: 8px; color: var(--muted); font-size: 14px; }
+
+  .features { display: grid; gap: 12px; }
+  .card { background: var(--card); border-radius: 26px; padding: 20px 24px; }
+  .card p { color: var(--muted); }
+
+  .widgets { display: grid; gap: 20px; align-items: center; }
+  .widgets img { display: block; width: 100%; max-width: 360px; height: auto; margin: 0 auto; border-radius: 20px; }
+
+  .card ul { margin: 8px 0; padding-left: 20px; color: var(--muted); }
+
+  footer { border-top: 1px solid var(--line); padding: 24px 8px 40px; color: var(--muted); font-size: 14px; text-align: center; }
+  footer p + p { margin-top: 8px; }
+
+  @media (min-width: 700px) {
+    .screens { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .features { grid-template-columns: repeat(2, 1fr); }
+    .widgets { grid-template-columns: 1fr 1fr; padding: 32px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="hero">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/icon-dark.png">
+      <img src="assets/icon.png" width="104" height="104" alt="">
+    </picture>
+    <h1>Pods</h1>
+    <p>Your AirPods on Android, with an interface that follows Samsung One UI.</p>
+    <nav class="actions" aria-label="Links">
+      <a class="button primary" href="https://github.com/arsh342/pods">View on GitHub</a>
+      <a class="button" href="privacy/">Privacy policy</a>
+    </nav>
+  </header>
+
+  <section class="screens" aria-label="Screenshots" style="margin-top: 40px">
+    <figure>
+      <img src="assets/home.png" width="524" height="1120" alt="Home page with battery levels and listening modes">
+      <figcaption>Home</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/controls.png" width="524" height="1120" alt="Controls page with press and hold and call controls">
+      <figcaption>Controls</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/equalizer-presets.png" width="524" height="1120" alt="Equalizer presets in two columns">
+      <figcaption>Equalizer</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/settings.png" width="524" height="1120" alt="Settings page">
+      <figcaption>Settings</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="features">
+    <h2 id="features">Features</h2>
+    <div class="features">
+      <div class="card">
+        <h3>Battery at a glance</h3>
+        <p>Levels for both earbuds and the case, with alerts at 10%, 5%, 2% and 1%.</p>
+      </div>
+      <div class="card">
+        <h3>Listening modes</h3>
+        <p>Noise cancellation, transparency and adaptive audio, also from a Quick Settings tile.</p>
+      </div>
+      <div class="card">
+        <h3>Equalizer</h3>
+        <p>Presets for the AirPods' own equalizer, and a custom bass, mid and treble setting you can save.</p>
+      </div>
+      <div class="card">
+        <h3>Controls</h3>
+        <p>Press and hold actions, call controls, ear detection, microphone choice and head gestures.</p>
+      </div>
+      <div class="card">
+        <h3>Private by design</h3>
+        <p>No account, adverts or analytics, and no internet permission. <a href="privacy/">Read the policy</a>.</p>
+      </div>
+      <div class="card">
+        <h3>Made for your model</h3>
+        <p>Pictures match your AirPods, and controls they do not support stay hidden.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card widgets" aria-labelledby="widgets">
+    <div>
+      <h3 id="widgets">Battery widgets</h3>
+      <p>Widgets that adapt to the size you give them, in light, dark or your system theme, with adjustable transparency.</p>
+    </div>
+    <img src="assets/widgets.png" width="516" height="832" alt="Pods battery widgets in several sizes, dark and light" loading="lazy">
+  </section>
+
+  <section class="card" aria-labelledby="requirements">
+    <h3 id="requirements">Requirements</h3>
+    <p>Without root, Pods needs one of these:</p>
+    <ul>
+      <li>Android 17 or newer</li>
+      <li>Android 16 on OnePlus, OPPO or realme phones</li>
+      <li>A Pixel on an Android 16 CP1A build</li>
+    </ul>
+    <p>Other phones need root with an Xposed framework. What you can control depends on your AirPods model, firmware and Android version.</p>
+  </section>
+
+  <footer>
+    <p><a href="privacy/">Privacy policy</a> · <a href="https://github.com/arsh342/pods/issues">Support</a> · <a href="https://github.com/arsh342/pods/blob/main/LICENSE">GPL v3 license</a></p>
+    <p>Pods is an independent community project, not affiliated with or endorsed by Apple or Samsung. AirPods is a trademark of Apple Inc.</p>
+  </footer>
+</main>
+</body>
+</html>
