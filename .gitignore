@@ -16,6 +16,7 @@ captures/
 *.apk
 *.aab
 /release/
+/android/app/play/
 
 # IDE and operating system files
 .idea/
@@ -27,8 +28,9 @@ captures/
 cmake-build-*/
 CMakeLists.txt.user*
 
-# Documentation
-docs/
+# Documentation (only the published privacy policy is tracked)
+docs/*
+!docs/privacy/
 oneui_design_guide_eng.pdf
 
 # Icons
